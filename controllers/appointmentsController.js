@@ -42,32 +42,28 @@ exports.addAppointment = async (req, res) => {
   }
 };
 
-exports.getAppointmentsByPatient = (req, res) => {
-  const patientId = req.params.id;
-  const filtered = appointments.filter((app) => app.patientId === patientId);
-
-  res.status(200).json({
-    status: 'success',
-    results: filtered.length,
-    data: {
-      appointments: filtered,
-    },
-  });
-};
-
-exports.deleteAppointment = (req, res) => {
-  const appointmentId = req.params.id;
-  const index = appointments.findIndex((app) => app.id === appointmentId);
-
-  if (index === -1) {
-    return res.status(404).json({
+exports.getAppointmentsByPatient = async (req, res) => {
+  try {
+    const appointments = await Appointment.find({
+      patient: req.params.id,
+    }).populate('patient');
+    res.status(200).json({
+      status: 'success',
+      results: appointments.length,
+      data: {
+        appointments,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
       status: 'fail',
-      message: 'Appointment not found',
+      message: err.message,
     });
   }
+};
 
-  appointments.splice(index, 1);
-
+exports.deleteAppointment = async (req, res) => {
+  await Appointment.findByIdAndDelete(req.params.id);
   res.status(204).json({
     status: 'success',
     data: null,
