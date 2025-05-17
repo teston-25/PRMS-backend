@@ -1,8 +1,8 @@
-// Dummy array to simulate DB for now
-const appointments = [];
+const Appointment = require('./../models/appointmentsModel');
+const Patient = require('../models/patientsModel');
 
-// GET /appointments - Get all appointments
-exports.getAllAppointments = (req, res) => {
+exports.getAppointments = async (req, res) => {
+  const appointments = await Appointment.find().populate('patient');
   res.status(200).json({
     status: 'success',
     results: appointments.length,
@@ -12,23 +12,36 @@ exports.getAllAppointments = (req, res) => {
   });
 };
 
-// POST /appointments - Add a new appointment
-exports.createAppointment = (req, res) => {
-  const newAppointment = {
-    id: Date.now().toString(), // Just a dummy unique ID
-    ...req.body,
-  };
-  appointments.push(newAppointment);
+exports.addAppointment = async (req, res) => {
+  try {
+    const { patient: patientData, date, doctor, reason } = req.body;
 
-  res.status(201).json({
-    status: 'success',
-    data: {
-      appointment: newAppointment,
-    },
-  });
+    let patient = await Patient.findOne({
+      $or: [{ email: patientData.email }, { phone: patientData.phone }],
+    });
+
+    if (!patient) {
+      patient = await Patient.create(patientData);
+    }
+
+    const appointment = await Appointment.create({
+      patient: patient._id,
+      date,
+      doctor,
+      reason,
+    });
+
+    res.status(201).json({
+      status: 'success',
+      data: {
+        appointment,
+      },
+    });
+  } catch (err) {
+    console.log(`error: ${err}`);
+  }
 };
 
-// GET /appointments/patient/:id - Get appointments by patient ID
 exports.getAppointmentsByPatient = (req, res) => {
   const patientId = req.params.id;
   const filtered = appointments.filter((app) => app.patientId === patientId);
@@ -42,7 +55,6 @@ exports.getAppointmentsByPatient = (req, res) => {
   });
 };
 
-// DELETE /appointments/:id - Delete an appointment by ID
 exports.deleteAppointment = (req, res) => {
   const appointmentId = req.params.id;
   const index = appointments.findIndex((app) => app.id === appointmentId);
