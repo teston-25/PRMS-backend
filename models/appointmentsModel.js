@@ -6,7 +6,7 @@ const appointmentSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'Appointment ID is required'],
       unique: true,
-      default: (Math.random() * 1000).toFixed(0),
+      default: () => Math.floor(Math.random() * 1000000),
     },
     date: {
       type: Date,

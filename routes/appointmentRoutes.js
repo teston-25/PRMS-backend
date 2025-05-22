@@ -1,14 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const {
-  getAppointments,
-  addAppointment,
-  getAppointmentsByPatient,
-  deleteAppointment,
-} = require('../controllers/appointmentsController');
+const appointmentsController = require('../controllers/appointmentsController');
+const protect = require('./../middleware/protect');
 
-router.route('/').get(getAppointments).post(addAppointment);
-router.get('/patient/:id', getAppointmentsByPatient);
-router.delete('/:id', deleteAppointment);
+router
+  .route('/')
+  .get(protect, appointmentsController.getAppointments)
+  .post(protect, appointmentsController.addAppointment);
+router.get(
+  '/patient/:id',
+  protect,
+  appointmentsController.getAppointmentsByPatient
+);
+router.delete('/:id', protect, appointmentsController.deleteAppointment);
 
 module.exports = router;

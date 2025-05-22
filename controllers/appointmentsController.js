@@ -1,18 +1,22 @@
 const Appointment = require('./../models/appointmentsModel');
 const Patient = require('../models/patientsModel');
+const AppError = require('../utils/appError');
 
-exports.getAppointments = async (req, res) => {
-  const appointments = await Appointment.find().populate('patient');
-  res.status(200).json({
-    status: 'success',
-    results: appointments.length,
-    data: {
-      appointments,
-    },
-  });
+exports.getAppointments = async (req, res, next) => {
+  try {
+    const appointments = await Appointment.find().populate('patient');
+
+    res.status(200).json({
+      status: 'success',
+      results: appointments.length,
+      data: { appointments },
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
-exports.addAppointment = async (req, res) => {
+exports.addAppointment = async (req, res, next) => {
   try {
     const { patient: patientData, date, doctor, reason } = req.body;
 
@@ -33,39 +37,46 @@ exports.addAppointment = async (req, res) => {
 
     res.status(201).json({
       status: 'success',
-      data: {
-        appointment,
-      },
+      data: { appointment },
     });
   } catch (err) {
-    console.log(`error: ${err}`);
+    next(err);
   }
 };
 
-exports.getAppointmentsByPatient = async (req, res) => {
+exports.getAppointmentsByPatient = async (req, res, next) => {
   try {
     const appointments = await Appointment.find({
       patient: req.params.id,
     }).populate('patient');
+
+    if (!appointments || appointments.length === 0) {
+      return next(new AppError('No appointments found for this patient', 404));
+    }
+
     res.status(200).json({
       status: 'success',
       results: appointments.length,
-      data: {
-        appointments,
-      },
+      data: { appointments },
     });
   } catch (err) {
-    res.status(404).json({
-      status: 'fail',
-      message: err.message,
-    });
+    next(err);
   }
 };
 
-exports.deleteAppointment = async (req, res) => {
-  await Appointment.findByIdAndDelete(req.params.id);
-  res.status(204).json({
-    status: 'success',
-    data: null,
-  });
+exports.deleteAppointment = async (req, res, next) => {
+  try {
+    const appointment = await Appointment.findByIdAndDelete(req.params.id);
+
+    if (!appointment) {
+      return next(new AppError('No appointment found with that ID', 404));
+    }
+
+    res.status(204).json({
+      status: 'success',
+      data: null,
+    });
+  } catch (err) {
+    next(err);
+  }
 };

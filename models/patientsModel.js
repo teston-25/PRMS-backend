@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
 
 const patientSchema = new mongoose.Schema(
   {
@@ -6,11 +7,13 @@ const patientSchema = new mongoose.Schema(
       type: String,
       required: [true, 'First name is required'],
       trim: true,
+      validate: [validator.isAlpha, 'Firstname has to be character only'],
     },
     lastName: {
       type: String,
       required: [true, 'Last name is required'],
       trim: true,
+      validate: [validator.isAlpha, 'Lastname has to be character only'],
     },
     dob: {
       type: Date,
@@ -19,7 +22,10 @@ const patientSchema = new mongoose.Schema(
     gender: {
       type: String,
       required: [true, 'Gender is required'],
-      enum: ['Male', 'Female', 'Other'],
+      enum: {
+        values: ['Male', 'Female', 'Other'],
+        message: 'Gender has to be either: male , female or other',
+      },
     },
     email: {
       type: String,
@@ -40,6 +46,18 @@ const patientSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+patientSchema.virtual('age').get(function () {
+  if (!this.dob) return null;
+  const today = new Date();
+  const birthDate = new Date(this.dob);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age;
+});
 
 patientSchema.virtual('appointments', {
   ref: 'Appointment',

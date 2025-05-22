@@ -1,19 +1,17 @@
 const express = require('express');
 const router = express.Router();
+const protect = require('./../middleware/protect');
 
-const {
-  getPatients,
-  addPatient,
-  getSinglePatient,
-  updatePatient,
-  deletePatient,
-} = require('../controllers/patientController');
+const patientController = require('../controllers/patientController');
 
-router.route('/').get(getPatients).post(addPatient);
+router
+  .route('/')
+  .get(protect, patientController.getPatients)
+  .post(protect, patientController.addPatient);
 router
   .route('/:id')
-  .get(getSinglePatient)
-  .patch(updatePatient)
-  .delete(deletePatient);
+  .get(protect, patientController.getSinglePatient)
+  .patch(protect, patientController.updatePatient)
+  .delete(protect, patientController.deletePatient);
 
 module.exports = router;
