@@ -18,12 +18,12 @@ app.use('/api/patient', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/profile', profileRoutes);
 
-// Handle unknown routes - must be before the global error handler
+app.use((req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
+});
 // app.all('*', (req, res, next) => {
 //   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
 // });
-
-// Global error handler - must be last
 app.use(globalErrorHandler);
 
 module.exports = app;
