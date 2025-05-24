@@ -58,3 +58,24 @@ exports.deletePatient = catchAsync(async (req, res, next) => {
     data: null,
   });
 });
+
+exports.searchPatients = catchAsync(async (req, res, next) => {
+  const { q } = req.query;
+
+  if (!q) {
+    return res.status(400).json({ message: 'Query is required' });
+  }
+
+  // Use regex for partial + case-insensitive search
+  const regex = new RegExp(q, 'i');
+
+  const results = await Patient.find({
+    $or: [{ fullName: regex }, { email: regex }, { phone: regex }],
+  });
+
+  res.status(200).json({
+    status: 'success',
+    results: results.length,
+    data: results,
+  });
+});
