@@ -23,9 +23,10 @@ const patientSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Gender is required'],
       enum: {
-        values: ['Male', 'Female', 'Other'],
+        values: ['male', 'female', 'other'],
         message: 'Gender has to be either: male , female or other',
       },
+      lowercase: true,
     },
     email: {
       type: String,
@@ -36,6 +37,7 @@ const patientSchema = new mongoose.Schema(
     phone: {
       type: String,
       required: [true, 'Phone number is required'],
+      unique: true,
     },
     address: {
       type: String,

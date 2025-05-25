@@ -1,11 +1,12 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const AppError = require('../utils/appError');
+const catchAsync = require('../utils/catchAsync');
 
-const protect = async (req, res, next) => {
+const protect = catchAsync(async (req, res, next) => {
   let token;
 
-  // Check for token in Authorization header
+  // 1. Check for token in Authorization header
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
@@ -19,24 +20,20 @@ const protect = async (req, res, next) => {
     );
   }
 
-  try {
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  // 2. Verify token
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Check if user still exists
-    const currentUser = await User.findById(decoded.id);
-    if (!currentUser) {
-      return next(
-        new AppError('The user belonging to this token no longer exists.', 401)
-      );
-    }
-
-    // Grant access
-    req.user = currentUser; // attach user object (or just id if you prefer)
-    next();
-  } catch (err) {
-    return next(new AppError('Invalid token. Please log in again!', 401));
+  // 3. Check if user still exists
+  const currentUser = await User.findById(decoded.id);
+  if (!currentUser) {
+    return next(
+      new AppError('The user belonging to this token no longer exists.', 401)
+    );
   }
-};
+
+  // 4. Grant access
+  req.user = currentUser;
+  next();
+});
 
 module.exports = protect;

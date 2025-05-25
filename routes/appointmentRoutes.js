@@ -7,7 +7,7 @@ const protect = require('./../middleware/protect');
  * @swagger
  * tags:
  *   name: Appointments
- *   description: API for managing patient appointments
+ *   description: Scheduling and retrieving appointments
  */
 
 /**
@@ -113,17 +113,92 @@ const protect = require('./../middleware/protect');
  *         description: Appointment not found
  */
 
+/**
+ * @swagger
+ * /appointments/{id}:
+ *   patch:
+ *     summary: Update an appointment (reschedule, notes, etc.)
+ *     tags: [Appointments]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Appointment ID to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               date:
+ *                 type: string
+ *                 format: date-time
+ *               doctor:
+ *                 type: string
+ *               reason:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Appointment updated successfully
+ *       404:
+ *         description: Appointment not found
+ */
+
+/**
+ * @swagger
+ * /appointments/today:
+ *   get:
+ *     summary: Get today's appointments
+ *     tags: [Appointments]
+ *     responses:
+ *       200:
+ *         description: List of today's appointments
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /appointments/by-date:
+ *   get:
+ *     summary: Get appointments for a specific date
+ *     tags: [Appointments]
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         schema:
+ *           type: string
+ *           format: date
+ *         required: true
+ *         description: Date to filter appointments (YYYY-MM-DD)
+ *     responses:
+ *       200:
+ *         description: List of appointments on the specified date
+ *       400:
+ *         description: Invalid or missing date query
+ */
+
 router
   .route('/')
   .get(protect, appointmentsController.getAppointments)
   .post(protect, appointmentsController.addAppointment);
-
 router.get(
   '/patient/:id',
   protect,
   appointmentsController.getAppointmentsByPatient
 );
-
-router.delete('/:id', protect, appointmentsController.deleteAppointment);
+router
+  .route('/today')
+  .get(protect, appointmentsController.getTodayAppointments);
+router
+  .route('/:id')
+  .patch(protect, appointmentsController.updateAppointment)
+  .delete(protect, appointmentsController.deleteAppointment);
+router
+  .route('/by-date')
+  .get(protect, appointmentsController.getAppointmentsByDate);
 
 module.exports = router;

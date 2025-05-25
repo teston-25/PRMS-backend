@@ -8,7 +8,7 @@ const patientController = require('../controllers/patientController');
  * @swagger
  * tags:
  *   name: Patients
- *   description: API for managing patients
+ *   description: CRUD and information about patients
  */
 
 /**
