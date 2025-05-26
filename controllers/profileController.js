@@ -1,10 +1,10 @@
 const bcrypt = require('bcryptjs');
-const User = require('../models/user');
+const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const validator = require('validator');
 const fs = require('fs');
 const path = require('path');
-const catchAsync = require('../utils/catchAsync');
+const catchAsync = require('../middleware/catchAsync');
 
 exports.getProfile = catchAsync(async (req, res, next) => {
   const userId = req.user.id;
@@ -58,6 +58,33 @@ exports.updateProfile = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: { user },
+  });
+});
+
+exports.changePassword = catchAsync(async (req, res, next) => {
+  const userId = req.user.id;
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return next(new AppError('Please provide current and new password', 400));
+  }
+
+  const user = await User.findById(userId).select('+password');
+
+  const isMatch = await user.matchPassword(currentPassword);
+  if (!isMatch) {
+    return next(new AppError('Your current password is incorrect', 401));
+  }
+
+  user.password = newPassword;
+  await user.save();
+
+  const token = generateToken(user);
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Password changed successfully',
+    token,
   });
 });
 

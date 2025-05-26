@@ -1,6 +1,6 @@
 const Patient = require('./../models/patientsModel');
 const AppError = require('./../utils/appError');
-const catchAsync = require('./../utils/catchAsync');
+const catchAsync = require('../middleware/catchAsync');
 
 exports.getPatients = catchAsync(async (req, res, next) => {
   const patients = await Patient.find();

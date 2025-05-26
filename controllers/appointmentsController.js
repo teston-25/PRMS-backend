@@ -1,7 +1,7 @@
 const Appointment = require('./../models/appointmentsModel');
 const Patient = require('../models/patientsModel');
 const AppError = require('../utils/appError');
-const catchAsync = require('../utils/catchAsync');
+const catchAsync = require('../middleware/catchAsync');
 const { getStartAndEndOfDay } = require('../utils/date');
 
 exports.getAppointments = catchAsync(async (req, res, next) => {

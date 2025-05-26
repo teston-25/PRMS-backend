@@ -1,6 +1,6 @@
 const History = require('../models/historyModel');
 const AppError = require('../utils/appError');
-const catchAsync = require('../utils/catchAsync');
+const catchAsync = require('../middleware/catchAsync');
 
 exports.getMedicalHistory = catchAsync(async (req, res, next) => {
   const history = await History.find({ patient: req.params.id });
