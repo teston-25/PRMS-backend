@@ -1,18 +1,10 @@
 const User = require('../models/userModel');
-const jwt = require('jsonwebtoken');
 const AppError = require('../utils/appError');
 const catchAsync = require('../middleware/catchAsync');
 const crypto = require('crypto');
 const sendEmail = require('../utils/emailSender');
 const emailVerify = require('../utils/emailVerify');
-
-const generateToken = (user) => {
-  return jwt.sign(
-    { id: user._id, role: user.role },
-    process.env.JWT_SECRET || 'super_super_secret_key',
-    { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
-  );
-};
+const generateToken = require('../utils/tokenGen');
 
 // Signup
 exports.signup = catchAsync(async (req, res, next) => {
@@ -26,7 +18,6 @@ exports.signup = catchAsync(async (req, res, next) => {
   if (exists) {
     return next(new AppError('Email already exists', 400));
   }
-
   const user = await User.create({ fullName, email, password, role });
   const token = generateToken(user);
 

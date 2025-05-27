@@ -524,7 +524,25 @@
  *       400:
  *         description: Invalid input
  */
-
+/**
+ * @swagger
+ * /patient/{id}:
+ *   patch:
+ *     summary: Update a patient by ID
+ *     tags: [Patients]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Patient ID
+ *     responses:
+ *       200:
+ *         description: Patient updated
+ *       404:
+ *         description: Patient not found
+ */
 /**
  * @swagger
  * /patient/{id}:
