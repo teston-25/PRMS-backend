@@ -3,7 +3,7 @@ const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('./catchAsync');
 
-const protect = catchAsync(async (req, res, next) => {
+exports.protect = catchAsync(async (req, res, next) => {
   let token;
 
   // 1. Check for token in Authorization header
@@ -36,4 +36,13 @@ const protect = catchAsync(async (req, res, next) => {
   next();
 });
 
-module.exports = protect;
+exports.restrictTo =
+  (...roles) =>
+  (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError('You do not have permission to perform this action', 403)
+      );
+    }
+    next();
+  };

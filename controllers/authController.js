@@ -43,6 +43,7 @@ exports.signin = catchAsync(async (req, res, next) => {
     return next(new AppError('Invalid email or password', 401));
   }
 
+  if (!user.active) return next(new AppError('Account is deactivated', 403));
   const token = generateToken(user);
 
   res.status(200).json({

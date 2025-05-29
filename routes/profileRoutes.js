@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const profileController = require('../controllers/profileController');
-const protect = require('./../middleware/protect');
+const { protect, restrictTo } = require('../middleware/protect');
 
-router.get('/me', protect, profileController.getProfile);
-router.patch('/me', protect, profileController.updateProfile);
+router.use(protect, restrictTo('admin', 'staff'));
+router.get('/me', profileController.getProfile);
+router.patch('/me', profileController.updateProfile);
 
 module.exports = router;

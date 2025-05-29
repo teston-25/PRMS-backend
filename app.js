@@ -12,11 +12,16 @@ const profileRoutes = require('./routes/profileRoutes');
 const authRoutes = require('./routes/authRoutes');
 const historyRoutes = require('./routes/historyRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const userRoutes = require('./routes/userRoutes');
+const { apiLimiter, loginLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
 
 app.use(morgan('dev'));
 app.use(express.json());
+
+app.use('/api/auth', loginLimiter);
+app.use('/api', apiLimiter);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -26,6 +31,7 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api', historyRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/users', userRoutes);
 
 app.use((req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));

@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const historyController = require('../controllers/historyController');
-const protect = require('../middleware/protect');
+const { protect, restrictTo } = require('../middleware/protect');
 
+router.use(protect, restrictTo('admin', 'staff'));
 router
-  .get('/patients/:id/history', protect, historyController.getMedicalHistory)
-  .post('/patients/:id/history', protect, historyController.addMedicalHistory);
+  .get('/patients/:id/history', historyController.getMedicalHistory)
+  .post('/patients/:id/history', historyController.addMedicalHistory);
 router
-  .patch('/history/:id', protect, historyController.updateMedicalHistory)
-  .delete('/history/:id', protect, historyController.deleteMedicalHistory);
+  .patch('/history/:id', historyController.updateMedicalHistory)
+  .delete('/history/:id', historyController.deleteMedicalHistory);
 
 module.exports = router;

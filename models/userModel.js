@@ -16,8 +16,8 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['user', 'admin', 'staff'],
-      default: 'user',
+      enum: ['admin', 'staff'],
+      default: 'staff',
     },
     password: {
       type: String,
@@ -28,8 +28,11 @@ const userSchema = new mongoose.Schema(
       ],
       select: false,
     },
+    active: {
+      type: Boolean,
+      default: true,
+    },
 
-    // Add these fields for reset token
     passwordResetToken: String,
     passwordResetExpires: Date,
   },
@@ -56,9 +59,9 @@ userSchema.methods.createPasswordResetToken = function () {
     .update(resetToken)
     .digest('hex');
 
-  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
 
-  return resetToken; // Send this token via email
+  return resetToken;
 };
 
 module.exports = mongoose.model('User', userSchema);
