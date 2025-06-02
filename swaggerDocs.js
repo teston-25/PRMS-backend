@@ -738,3 +738,101 @@
  *       404:
  *         description: No diagnosis data found
  */
+
+// ##################################################   adminUser  ###############################################
+
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: User and role management
+ */
+
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Get all users
+ *     tags: [Users]
+ *     responses:
+ *       200:
+ *         description: List of users
+ */
+
+/**
+ * @swagger
+ * /users/{id}/role:
+ *   patch:
+ *     summary: Change user role
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - role
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 example: staff
+ *     responses:
+ *       200:
+ *         description: Role updated
+ */
+
+/**
+ * @swagger
+ * /users/{id}/status:
+ *   patch:
+ *     summary: Activate or deactivate a user
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - active
+ *             properties:
+ *               active:
+ *                 type: boolean
+ *                 example: false
+ *     responses:
+ *       200:
+ *         description: User status updated
+ */
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   delete:
+ *     summary: Delete user
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       204:
+ *         description: User deleted
+ */
