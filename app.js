@@ -25,6 +25,10 @@ app.use('/api', apiLimiter);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+app.get('/', (req, res) => {
+  res.send('🎉 Welcome to the Backend API!');
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/patient', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
