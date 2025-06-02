@@ -19,6 +19,7 @@ const app = express();
 
 app.use(morgan('dev'));
 app.use(express.json());
+app.set('trust proxy', 1);
 
 app.use('/api/auth', loginLimiter);
 app.use('/api', apiLimiter);
