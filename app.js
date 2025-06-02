@@ -20,7 +20,7 @@ const app = express();
 app.use(morgan('dev'));
 app.use(express.json());
 
-// app.use('/api/auth', loginLimiter);
+app.use('/api/auth', loginLimiter);
 app.use('/api', apiLimiter);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
