@@ -5,7 +5,7 @@ const catchAsync = require('../middleware/catchAsync');
 const { getStartAndEndOfDay } = require('../utils/date');
 
 exports.getAppointments = catchAsync(async (req, res, next) => {
-  const appointments = await Appointment.find().populate('patient');
+  const appointments = await Appointment.find().populate('patient assignedTo');
 
   res.status(200).json({
     status: 'success',
@@ -15,7 +15,7 @@ exports.getAppointments = catchAsync(async (req, res, next) => {
 });
 
 exports.addAppointment = catchAsync(async (req, res, next) => {
-  const { patient: patientData, date, doctor, reason } = req.body;
+  const { patient: patientData, date, assignedTo, reason } = req.body;
 
   if (!patientData.email && !patientData.phone) {
     return next(
@@ -34,7 +34,7 @@ exports.addAppointment = catchAsync(async (req, res, next) => {
   const appointment = await Appointment.create({
     patient: patient._id,
     date,
-    doctor,
+    assignedTo,
     reason,
   });
 
@@ -95,7 +95,6 @@ exports.updateAppointment = catchAsync(async (req, res, next) => {
 exports.getTodayAppointments = catchAsync(async (req, res, next) => {
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
-
   const endOfDay = new Date();
   endOfDay.setHours(23, 59, 59, 999);
 
@@ -104,14 +103,12 @@ exports.getTodayAppointments = catchAsync(async (req, res, next) => {
   }).populate('patient');
 
   if (appointments.length === 0)
-    return next(new AppError('No Appointtments found today', 404));
+    return next(new AppError('No Appointments found today', 404));
 
   res.status(200).json({
     status: 'success',
     results: appointments.length,
-    data: {
-      appointments,
-    },
+    data: { appointments },
   });
 });
 
@@ -131,14 +128,44 @@ exports.getAppointmentsByDate = catchAsync(async (req, res, next) => {
 
   if (appointments.length === 0)
     return next(
-      new AppError(`No Appointment found by this date: ${date}`, 404)
+      new AppError(`No Appointments found by this date: ${date}`, 404)
     );
 
   res.status(200).json({
     status: 'success',
     results: appointments.length,
-    data: {
-      appointments,
-    },
+    data: { appointments },
+  });
+});
+
+exports.getMyAppointments = catchAsync(async (req, res, next) => {
+  const appointments = await Appointment.find({
+    assignedTo: req.user._id,
+  }).populate('patient');
+
+  res.status(200).json({
+    status: 'success',
+    results: appointments.length,
+    data: { appointments },
+  });
+});
+
+exports.updateAppointmentStatus = catchAsync(async (req, res, next) => {
+  const appointment = await Appointment.findById(req.params.id);
+
+  if (!appointment) return next(new AppError('No appointment found', 404));
+
+  if (appointment.assignedTo.toString() !== req.user._id.toString()) {
+    return next(
+      new AppError('You are not authorized to update this appointment', 403)
+    );
+  }
+
+  appointment.status = req.body.status || appointment.status;
+  await appointment.save();
+
+  res.status(200).json({
+    status: 'success',
+    data: { appointment },
   });
 });

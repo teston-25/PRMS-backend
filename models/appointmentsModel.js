@@ -2,20 +2,9 @@ const mongoose = require('mongoose');
 
 const appointmentSchema = new mongoose.Schema(
   {
-    appointmentId: {
-      type: Number,
-      required: [true, 'Appointment ID is required'],
-      unique: true,
-      default: () => Math.floor(Math.random() * 1000000),
-    },
     date: {
       type: Date,
       required: [true, 'Appointment date is required'],
-    },
-    doctor: {
-      type: String,
-      required: [true, 'Doctor name is required'],
-      trim: true,
     },
     reason: {
       type: String,
@@ -27,9 +16,19 @@ const appointmentSchema = new mongoose.Schema(
       ref: 'Patient',
       required: [true, 'Patient reference is required'],
     },
+    assignedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: [true, 'Doctor/staff is required'],
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'confirmed', 'completed', 'cancelled'],
+      default: 'pending',
+    },
   },
   {
-    timestamps: true, // Adds createdAt and updatedAt fields
+    timestamps: true,
   }
 );
 

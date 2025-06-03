@@ -1,26 +1,32 @@
 const express = require('express');
 const router = express.Router();
 const appointmentsController = require('../controllers/appointmentsController');
-const { protect } = require('./../middleware/protect');
+const { protect, restrictTo } = require('./../middleware/protect');
+
+router.use(protect);
 
 router
   .route('/')
-  .get(protect, appointmentsController.getAppointments)
-  .post(protect, appointmentsController.addAppointment);
-router.get(
-  '/patient/:id',
-  protect,
-  appointmentsController.getAppointmentsByPatient
-);
+  .get(appointmentsController.getAppointments)
+  .post(appointmentsController.addAppointment);
+
+router.route('/today').get(appointmentsController.getTodayAppointments);
+
+router.route('/by-date').get(appointmentsController.getAppointmentsByDate);
+
 router
-  .route('/today')
-  .get(protect, appointmentsController.getTodayAppointments);
+  .route('/patient/:id')
+  .get(appointmentsController.getAppointmentsByPatient);
+
+router.route('/my-appointments').get(appointmentsController.getMyAppointments);
+
+router
+  .route('/:id/status')
+  .patch(appointmentsController.updateAppointmentStatus);
+
 router
   .route('/:id')
-  .patch(protect, appointmentsController.updateAppointment)
-  .delete(protect, appointmentsController.deleteAppointment);
-router
-  .route('/by-date')
-  .get(protect, appointmentsController.getAppointmentsByDate);
+  .patch(restrictTo('admin'), appointmentsController.updateAppointment)
+  .delete(restrictTo('admin'), appointmentsController.deleteAppointment);
 
 module.exports = router;
