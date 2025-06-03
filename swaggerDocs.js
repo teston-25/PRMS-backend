@@ -313,7 +313,54 @@
  *         description: Invalid or missing date query
  */
 
-// ##################################################   billRoutes  ###############################################
+/**
+ * @swagger
+ * /appointments/my-appointments:
+ *   get:
+ *     summary: Get appointments assigned to the logged-in doctor/staff
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of appointments for the current user
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /appointments/{id}/status:
+ *   patch:
+ *     summary: Update appointment status (Doctor/Staff only for their own appointments)
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Appointment ID to update status for
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [pending, confirmed, completed, cancelled]
+ *     responses:
+ *       200:
+ *         description: Appointment status updated successfully
+ *       403:
+ *         description: Not authorized to update this appointment
+ *       404:
+ *         description: Appointment not found
+ */
 
 // ##################################################   historyRoutes  ###############################################
 
