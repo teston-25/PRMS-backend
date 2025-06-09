@@ -3,7 +3,7 @@ const router = express.Router();
 const historyController = require('../controllers/historyController');
 const { protect, restrictTo } = require('../middleware/protect');
 
-app.use(protect);
+router.use(protect);
 
 router
   .route('/patients/:id/history')
