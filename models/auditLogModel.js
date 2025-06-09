@@ -7,8 +7,15 @@ const auditLogSchema = new mongoose.Schema({
     role: String,
   },
   target: {
-    type: String,
-    id: mongoose.Schema.Types.ObjectId,
+    type: {
+      type: String,
+      required: true,
+    },
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      refPath: 'target.type',
+    },
   },
   details: Object,
   createdAt: {

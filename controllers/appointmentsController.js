@@ -39,6 +39,10 @@ exports.addAppointment = catchAsync(async (req, res, next) => {
       new AppError('Email or phone is required to identify patient', 400)
     );
   }
+  const user = await User.findById(assignedTo);
+  if (!user || user.role !== 'doctor') {
+    return next(new AppError('Assigned user must have a doctor role', 400));
+  }
 
   let patient = await Patient.findOne({
     $or: [{ email: patientData.email }, { phone: patientData.phone }],
