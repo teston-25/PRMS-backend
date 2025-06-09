@@ -364,7 +364,7 @@
 
 /**
  * @swagger
- * /appointments/today:
+ * /appointments/today/my:
  *   get:
  *     summary: Get today's appointments assigned to the logged-in user
  *     description: Retrieves up to 10 appointments scheduled for today for the currently authenticated user (doctor or staff).

@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 const catchAsync = require('../middleware/catchAsync');
 const AppError = require('../utils/appError');
+const logAction = require('../utils/logAction');
 
 /** ================= Role Matrix =================
  Handler           Admin  Staff  Doctor  User 

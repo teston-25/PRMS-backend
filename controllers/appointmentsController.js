@@ -4,6 +4,7 @@ const AppError = require('../utils/appError');
 const catchAsync = require('../middleware/catchAsync');
 const { getStartAndEndOfDay } = require('../utils/date');
 const logAction = require('../utils/logAction');
+const User = require('../models/userModel');
 
 /* ================= Role Matrix =================
 

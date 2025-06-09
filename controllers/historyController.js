@@ -1,6 +1,8 @@
 const History = require('../models/historyModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../middleware/catchAsync');
+const logAction = require('../utils/logAction');
+
 /*================== Role matrix ====================
 Handler	                  User	Doctor	Staff	Admin
 |----------------------|:----:|:----:|:----:|:------:|

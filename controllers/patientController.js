@@ -1,6 +1,7 @@
 const Patient = require('./../models/patientsModel');
 const AppError = require('./../utils/appError');
 const catchAsync = require('../middleware/catchAsync');
+const logAction = require('../utils/logAction');
 
 /* ================= Role Matrix =================
  Handler             Admin  Staff  Doctor  User (patient) 
