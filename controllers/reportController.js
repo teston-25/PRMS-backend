@@ -4,6 +4,14 @@ const History = require('../models/historyModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../middleware/catchAsync');
 
+/**============================ Role matrix =====================
+ Handler	                          User	Doctor	Staff	Admin
+ |-------------------------------|:-----:|:----:|:----:|:------------:|
+ Get Summary Report	                ✘	    ✔	      ✔	    ✔
+ Get Appointments By Date Range	    ✘	    ✔	      ✔	    ✔
+ Get Frequent Diagnoses	            ✘	    ✔	      ✔	    ✔
+================================================================= */
+
 exports.getSummaryReport = catchAsync(async (req, res, next) => {
   const totalPatients = await Patient.countDocuments();
   const totalAppointments = await Appointment.countDocuments();

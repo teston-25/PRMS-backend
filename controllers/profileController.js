@@ -3,6 +3,13 @@ const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const validator = require('validator');
 const catchAsync = require('../middleware/catchAsync');
+/** ===================Role matrix ====================
+ Operation	      User	Doctor	Staff	Admin
+|--------------|:-----:|:----:|:----:|:------------:|
+ Get Profile	    ✔	    ✔	      ✔	    ✔
+ Update Profile	  ✔	    ✔	      ✔     ✔
+ =====================================================
+ */
 
 exports.getProfile = catchAsync(async (req, res, next) => {
   const userId = req.user.id;

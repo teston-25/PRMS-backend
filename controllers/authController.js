@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const sendEmail = require('../utils/emailSender');
 const emailVerify = require('../utils/emailVerify');
 const generateToken = require('../utils/tokenGen');
+const logAction = require('../utils/logAction');
 
 // Signup
 exports.signup = catchAsync(async (req, res, next) => {
@@ -20,6 +21,14 @@ exports.signup = catchAsync(async (req, res, next) => {
   }
   const user = await User.create({ fullName, email, password, role });
   const token = generateToken(user);
+
+  await logAction({
+    req,
+    actor: user,
+    action: 'User Signup',
+    targetType: 'User',
+    targetId: user._id,
+  });
 
   res.status(201).json({
     status: 'success',
@@ -46,6 +55,13 @@ exports.signin = catchAsync(async (req, res, next) => {
   if (!user.active) return next(new AppError('Account is deactivated', 403));
   const token = generateToken(user);
 
+  await logAction({
+    req,
+    action: 'User Login',
+    targetType: 'User',
+    targetId: user._id,
+  });
+
   res.status(200).json({
     status: 'success',
     message: 'Login successful',
@@ -67,6 +83,13 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
   const resetToken = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
+
+  await logAction({
+    req,
+    action: 'Forgot Password',
+    targetType: 'User',
+    targetId: user._id,
+  });
 
   const resetURL = `http://localhost:5173/reset-password/${resetToken}`;
 
@@ -111,6 +134,14 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   user.passwordResetToken = undefined;
   user.passwordResetExpires = undefined;
   await user.save();
+
+  await logAction({
+    req,
+    actor: user,
+    action: 'Password-Reset Performed',
+    targetType: 'User',
+    targetId: user._id,
+  });
 
   const token = generateToken(user);
   res.status(200).json({

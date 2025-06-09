@@ -3,7 +3,7 @@ const reportController = require('../controllers/reportController');
 const router = express.Router();
 const { protect, restrictTo } = require('../middleware/protect');
 
-router.use(protect, restrictTo('admin', 'staff'));
+router.use(protect, restrictTo('admin', 'staff', 'doctor'));
 router.get('/summary', reportController.getSummaryReport);
 router.get(
   '/appointments-by-date',

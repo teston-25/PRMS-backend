@@ -362,6 +362,42 @@
  *         description: Appointment not found
  */
 
+/**
+ * @swagger
+ * /appointments/today:
+ *   get:
+ *     summary: Get today's appointments assigned to the logged-in user
+ *     description: Retrieves up to 10 appointments scheduled for today for the currently authenticated user (doctor or staff).
+ *     tags: [Appointments]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of today's appointments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 results:
+ *                   type: integer
+ *                   example: 2
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     appointments:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Appointment'
+ *       404:
+ *         description: No appointments for you today
+ *       401:
+ *         description: Unauthorized – missing or invalid token
+ */
+
 // ##################################################   historyRoutes  ###############################################
 
 /**

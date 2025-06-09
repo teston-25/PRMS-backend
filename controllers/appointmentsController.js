@@ -3,6 +3,23 @@ const Patient = require('../models/patientsModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../middleware/catchAsync');
 const { getStartAndEndOfDay } = require('../utils/date');
+const logAction = require('../utils/logAction');
+
+/* ================= Role Matrix =================
+
+Handler	                    Admin	Staff	Doctor  User (patient)
+|-------------------------|:----:|:--:|:----:|:--------:|
+getAppointments	            ✔     ✔    ✖     	✖
+addAppointment	            ✔	    ✔	   ✖	    ✖
+deleteAppointment	          ✔	    ✔	   ✖	    ✖
+updateAppointment	          ✔	    ✔	   ✖	    ✖
+getTodayAppointments	      ✔    	✔	   ✖	    ✖
+getAppointmentsByDate	      ✔	    ✔	   ✖	    ✖
+getAppointmentsByPatient	  ✔	    ✔	   ✖	    ✔ 
+getMyAppointments	          ✖	    ✔	   ✔	    ✖
+updateAppointmentStatus	    ✖	    ✖	   ✔ 	    ✖
+getTodayMyAppointments	    ✖	    ✔	   ✔	    ✖
+================================================= */
 
 exports.getAppointments = catchAsync(async (req, res, next) => {
   const appointments = await Appointment.find().populate('patient assignedTo');
@@ -38,25 +55,17 @@ exports.addAppointment = catchAsync(async (req, res, next) => {
     reason,
   });
 
+  await logAction({
+    req,
+    action: 'Add appointment',
+    targetType: 'Patient',
+    targetId: patient._id,
+    details: { newPatient: patient.email },
+  });
+
   res.status(201).json({
     status: 'success',
     data: { appointment },
-  });
-});
-
-exports.getAppointmentsByPatient = catchAsync(async (req, res, next) => {
-  const appointments = await Appointment.find({
-    patient: req.params.id,
-  }).populate('patient');
-
-  if (!appointments || appointments.length === 0) {
-    return next(new AppError('No appointments found for this patient', 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    results: appointments.length,
-    data: { appointments },
   });
 });
 
@@ -66,6 +75,14 @@ exports.deleteAppointment = catchAsync(async (req, res, next) => {
   if (!appointment) {
     return next(new AppError('No appointment found with that ID', 404));
   }
+
+  await logAction({
+    req,
+    action: 'Delete appointment',
+    targetType: 'Appointment',
+    targetId: appointment._id,
+    details: { deletedAppointmentId: appointment._id },
+  });
 
   res.status(204).json({
     status: 'success',
@@ -83,6 +100,14 @@ exports.updateAppointment = catchAsync(async (req, res, next) => {
   if (!updatedAppointment) {
     return next(new AppError('Appointment not found', 404));
   }
+
+  await logAction({
+    req,
+    action: 'Update Appointment',
+    targetType: 'Appointment',
+    targetId: updatedAppointment._id,
+    details: { updatedAppointment: req.body },
+  });
 
   res.status(200).json({
     status: 'success',
@@ -138,6 +163,22 @@ exports.getAppointmentsByDate = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.getAppointmentsByPatient = catchAsync(async (req, res, next) => {
+  const appointments = await Appointment.find({
+    patient: req.params.id,
+  }).populate('patient');
+
+  if (!appointments || appointments.length === 0) {
+    return next(new AppError('No appointments found for this patient', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    results: appointments.length,
+    data: { appointments },
+  });
+});
+
 exports.getMyAppointments = catchAsync(async (req, res, next) => {
   const appointments = await Appointment.find({
     assignedTo: req.user._id,
@@ -164,8 +205,40 @@ exports.updateAppointmentStatus = catchAsync(async (req, res, next) => {
   appointment.status = req.body.status || appointment.status;
   await appointment.save();
 
+  await logAction({
+    req,
+    action: 'Update Appointment Status',
+    targetType: 'Appointment',
+    targetId: appointment._id,
+    details: { newStatus: req.body.status },
+  });
+
   res.status(200).json({
     status: 'success',
     data: { appointment },
+  });
+});
+
+exports.getTodayMyAppointments = catchAsync(async (req, res, next) => {
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const endOfDay = new Date();
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const appointments = await Appointment.find({
+    assignedTo: req.user._id,
+    date: { $gte: startOfDay, $lte: endOfDay },
+  })
+    .populate('patient')
+    .limit(10);
+
+  if (!appointments.length)
+    return next(new AppError('No appointments for you today', 404));
+
+  res.status(200).json({
+    status: 'success',
+    results: appointments.length,
+    data: { appointments },
   });
 });

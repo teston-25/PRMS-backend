@@ -13,6 +13,7 @@ const authRoutes = require('./routes/authRoutes');
 const historyRoutes = require('./routes/historyRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const userRoutes = require('./routes/userRoutes');
+const auditRoutes = require('./routes/auditRoutes');
 const { apiLimiter, loginLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
@@ -37,6 +38,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api', historyRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/audit-logs', auditRoutes);
 
 app.use((req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));

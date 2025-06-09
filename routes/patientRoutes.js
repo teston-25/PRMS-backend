@@ -3,16 +3,21 @@ const router = express.Router();
 const patientController = require('../controllers/patientController');
 const { protect, restrictTo } = require('../middleware/protect');
 
-router.use(protect, restrictTo('admin', 'staff'));
+router.use(protect);
 router
   .route('/')
-  .get(patientController.getPatients)
-  .post(patientController.addPatient);
+  .get(restrictTo('admin', 'staff'), patientController.getPatients)
+  .post(restrictTo('admin', 'staff'), patientController.addPatient);
 router
   .route('/:id')
-  .get(patientController.getSinglePatient)
-  .patch(patientController.updatePatient)
-  .delete(patientController.deletePatient);
-router.route('/patients/search').get(patientController.searchPatients);
+  .get(
+    restrictTo('admin', 'staff', 'doctor', 'user'),
+    patientController.getSinglePatient
+  )
+  .patch(restrictTo('admin', 'staff'), patientController.updatePatient)
+  .delete(restrictTo('admin', 'staff'), patientController.deletePatient);
+router
+  .route('/patients/search')
+  .get(restrictTo('admin', 'staff'), patientController.searchPatients);
 
 module.exports = router;
