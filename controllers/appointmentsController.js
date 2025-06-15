@@ -46,7 +46,10 @@ exports.addAppointment = catchAsync(async (req, res, next) => {
   }
 
   let patient = await Patient.findOne({
-    $or: [{ email: patientData.email }, { phone: patientData.phone }],
+    $or: [
+      { email: patientData.email?.toLowerCase() },
+      { phone: patientData.phone },
+    ],
   });
 
   if (!patient) {
