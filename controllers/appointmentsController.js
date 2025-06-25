@@ -23,7 +23,9 @@ getTodayMyAppointments	    ✖	    ✔	   ✔	    ✖
 ================================================= */
 
 exports.getAppointments = catchAsync(async (req, res, next) => {
-  const appointments = await Appointment.find().populate('patient assignedTo');
+  const appointments = await Appointment.find()
+    .populate('patient')
+    .populate('assignedTo');
 
   res.status(200).json({
     status: 'success',

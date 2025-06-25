@@ -19,7 +19,7 @@ const appointmentSchema = new mongoose.Schema(
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'Doctor/staff is required'],
+      required: [true, 'Doctor is required'],
     },
     status: {
       type: String,
