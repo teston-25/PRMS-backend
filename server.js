@@ -1,13 +1,26 @@
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
+const cors = require('cors');
+const express = require('express');
 
-const app = require('./app');
+const app = express();
 const port = process.env.PORT || 5000;
 
 dotenv.config({ path: './config.env' });
-const db =
-  // process.env.DATABASE_LOCAL ||
-  process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
+const db = process.env.DATABASE_LOCAL;
+// const db = process.env.DATABASE.replace(
+//   '<PASSWORD>',
+//   process.env.DATABASE_PASSWORD
+// );
+
+// Allow requests from your frontend domain
+app.use(
+  cors({
+    origin: '*', // <-- change to your frontend URL
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 
 mongoose
   .connect(db)
