@@ -8,7 +8,7 @@ const apiLimiter = rateLimit({
 
 const loginLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 10,
+  max: 50,
   message: 'Too many login attempts. Try again in an hour.',
 });
 
