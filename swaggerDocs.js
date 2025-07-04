@@ -919,3 +919,65 @@
  *       204:
  *         description: User deleted
  */
+
+// ##################################################   audit log  ###############################################
+
+/**
+ * @swagger
+ * tags:
+ *   name: Audit Logs
+ *   description: Access to audit logs (admin only)
+ */
+
+/**
+ * @swagger
+ * /api/audit-logs:
+ *   get:
+ *     summary: Get the latest audit logs
+ *     description: Retrieve up to the 100 most recent audit logs. Only accessible by admin users.
+ *     tags: [Audit Logs]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: A list of audit logs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 results:
+ *                   type: integer
+ *                   example: 42
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       action:
+ *                         type: string
+ *                         example: Create Patient
+ *                       user:
+ *                         type: string
+ *                         example: 60f1c2e8f14d0c001c9e4d8a
+ *                       targetType:
+ *                         type: string
+ *                         example: Patient
+ *                       targetId:
+ *                         type: string
+ *                         example: 65fc1b4a03f8a9d4723f3a12
+ *                       details:
+ *                         type: object
+ *                         example: { patientName: "John Doe" }
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: 2024-06-01T14:48:00.000Z
+ *       401:
+ *         description: Unauthorized - no token provided
+ *       403:
+ *         description: Forbidden - not an admin
+ */
