@@ -14,13 +14,25 @@ const historyRoutes = require('./routes/historyRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const userRoutes = require('./routes/userRoutes');
 const auditRoutes = require('./routes/auditRoutes');
+const cors = require('cors');
 const { apiLimiter, loginLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
 
+app.set('trust proxy', 1);
+app.use(
+  cors({
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'https://your-frontend.com',
+    ],
+    credentials: true,
+  })
+);
+
 app.use(morgan('dev'));
 app.use(express.json());
-app.set('trust proxy', 1);
 
 app.use('/api/auth', loginLimiter);
 app.use('/api', apiLimiter);
@@ -43,9 +55,6 @@ app.use('/api/audit-logs', auditRoutes);
 app.use((req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
 });
-// app.all('*', (req, res, next) => {
-//   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
-// });
 app.use(globalErrorHandler);
 
 module.exports = app;

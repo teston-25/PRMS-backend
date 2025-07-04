@@ -42,9 +42,26 @@ exports.addAppointment = catchAsync(async (req, res, next) => {
       new AppError('Email or phone is required to identify patient', 400)
     );
   }
+
   const user = await User.findById(assignedTo);
   if (!user || user.role !== 'doctor') {
     return next(new AppError('Assigned user must have a doctor role', 400));
+  }
+
+  const appointmentDate = new Date(date);
+  const startOfDay = new Date(appointmentDate.setHours(0, 0, 0, 0));
+  const endOfDay = new Date(appointmentDate.setHours(23, 59, 59, 999));
+
+  const existingCount = await Appointment.countDocuments({
+    assignedTo,
+    date: { $gte: startOfDay, $lte: endOfDay },
+  });
+
+  const MAX_DAILY_APPOINTMENTS = 30;
+  if (existingCount >= MAX_DAILY_APPOINTMENTS) {
+    return next(
+      new AppError('This doctor already has 30 appointments on this day.', 400)
+    );
   }
 
   let patient = await Patient.findOne({
@@ -55,7 +72,10 @@ exports.addAppointment = catchAsync(async (req, res, next) => {
   });
 
   if (!patient) {
-    patient = await Patient.create(patientData);
+    patient = await Patient.create({
+      ...patientData,
+      email: patientData.email?.toLowerCase(),
+    });
   }
 
   const appointment = await Appointment.create({
@@ -70,12 +90,14 @@ exports.addAppointment = catchAsync(async (req, res, next) => {
     action: 'Add appointment',
     targetType: 'Patient',
     targetId: patient._id,
-    details: { newPatient: patient.email },
+    details: { newPatient: patient.email || patient.phone },
   });
 
   res.status(201).json({
     status: 'success',
-    data: { appointment },
+    data: {
+      appointment,
+    },
   });
 });
 
