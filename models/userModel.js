@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    patient: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Patient',
+    },
 
     passwordResetToken: String,
     passwordResetExpires: Date,

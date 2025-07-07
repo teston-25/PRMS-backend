@@ -6,6 +6,7 @@ const sendEmail = require('../utils/emailSender');
 const emailVerify = require('../utils/emailVerify');
 const generateToken = require('../utils/tokenGen');
 const logAction = require('../utils/logAction');
+const bcrypt = require('bcryptjs');
 
 // Signup
 exports.signup = catchAsync(async (req, res, next) => {
@@ -47,20 +48,26 @@ exports.signup = catchAsync(async (req, res, next) => {
 exports.signin = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ email }).select('+password');
-  if (!user || !(await user.matchPassword(password))) {
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanPassword = password.trim();
+
+  const user = await User.findOne({ email: cleanEmail }).select('+password');
+
+  if (!user) {
     return next(new AppError('Invalid email or password', 401));
   }
 
-  if (!user.active) return next(new AppError('Account is deactivated', 403));
-  const token = generateToken(user);
+  const isMatch = await bcrypt.compare(cleanPassword, user.password);
 
-  await logAction({
-    req,
-    action: 'User Login',
-    targetType: 'User',
-    targetId: user._id,
-  });
+  if (!isMatch) {
+    return next(new AppError('Invalid email or password', 401));
+  }
+
+  if (!user.active) {
+    return next(new AppError('Account is deactivated', 403));
+  }
+
+  const token = generateToken(user);
 
   res.status(200).json({
     status: 'success',
@@ -91,7 +98,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     targetId: user._id,
   });
 
-  const resetURL = `http://localhost:5173/reset-password/${resetToken}`;
+  const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
   try {
     await sendEmail({

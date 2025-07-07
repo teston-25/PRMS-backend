@@ -11,7 +11,7 @@
 
 /**
  * @swagger
- * /auth/signup:
+ * /api/auth/signup:
  *   post:
  *     summary: Register a new user
  *     tags: [Auth]
@@ -47,7 +47,7 @@
 
 /**
  * @swagger
- * /auth/signin:
+ * /api/auth/signin:
  *   post:
  *     summary: Log in an existing user
  *     tags: [Auth]
@@ -76,7 +76,7 @@
 
 /**
  * @swagger
- * /auth/forgot-password:
+ * /api/auth/forgot-password:
  *   post:
  *     summary: Send a password reset token to the user's email
  *     tags: [Auth]
@@ -103,7 +103,7 @@
 
 /**
  * @swagger
- * /auth/reset-password/{token}:
+ * /api/auth/reset-password/{token}:
  *   patch:
  *     summary: Reset the user's password using the token sent via email
  *     tags: [Auth]
@@ -144,7 +144,7 @@
 
 /**
  * @swagger
- * /appointments:
+ * /api/appointments:
  *   get:
  *     summary: Get all appointments
  *     tags: [Appointments]
@@ -159,7 +159,7 @@
 
 /**
  * @swagger
- * /appointments:
+ * /api/appointments:
  *   post:
  *     summary: Add a new appointment
  *     tags: [Appointments]
@@ -203,7 +203,7 @@
 
 /**
  * @swagger
- * /appointments/patient/{id}:
+ * /api/appointments/patient/{id}:
  *   get:
  *     summary: Get appointments by patient ID
  *     tags: [Appointments]
@@ -225,7 +225,7 @@
 
 /**
  * @swagger
- * /appointments/{id}:
+ * /api/appointments/{id}:
  *   delete:
  *     summary: Delete an appointment by ID
  *     tags: [Appointments]
@@ -247,7 +247,7 @@
 
 /**
  * @swagger
- * /appointments/{id}:
+ * /api/appointments/{id}:
  *   patch:
  *     summary: Update an appointment (reschedule, notes, etc.)
  *     tags: [Appointments]
@@ -281,7 +281,7 @@
 
 /**
  * @swagger
- * /appointments/today:
+ * /api/appointments/today:
  *   get:
  *     summary: Get today's appointments
  *     tags: [Appointments]
@@ -294,7 +294,7 @@
 
 /**
  * @swagger
- * /appointments/by-date:
+ * /api/appointments/by-date:
  *   get:
  *     summary: Get appointments for a specific date
  *     tags: [Appointments]
@@ -315,7 +315,7 @@
 
 /**
  * @swagger
- * /appointments/my-appointments:
+ * /api/appointments/my-appointments:
  *   get:
  *     summary: Get appointments assigned to the logged-in doctor/staff
  *     tags: [Appointments]
@@ -330,7 +330,7 @@
 
 /**
  * @swagger
- * /appointments/{id}/status:
+ * /api/appointments/{id}/status:
  *   patch:
  *     summary: Update appointment status (Doctor/Staff only for their own appointments)
  *     tags: [Appointments]
@@ -364,7 +364,7 @@
 
 /**
  * @swagger
- * /appointments/today/my:
+ * /api/appointments/today/my:
  *   get:
  *     summary: Get today's appointments assigned to the logged-in user
  *     description: Retrieves up to 10 appointments scheduled for today for the currently authenticated user (doctor or staff).
@@ -553,7 +553,7 @@
 
 /**
  * @swagger
- * /patient/{id}:
+ * /api/patient/{id}:
  *   get:
  *     summary: Get a single patient by ID
  *     tags: [Patients]
@@ -573,7 +573,7 @@
 
 /**
  * @swagger
- * /patient:
+ * /api/patient:
  *   post:
  *     summary: Add a new patient
  *     tags: [Patients]
@@ -609,7 +609,7 @@
  */
 /**
  * @swagger
- * /patient/{id}:
+ * /api/patient/{id}:
  *   patch:
  *     summary: Update a patient by ID
  *     tags: [Patients]
@@ -628,7 +628,7 @@
  */
 /**
  * @swagger
- * /patient/{id}:
+ * /api/patient/{id}:
  *   delete:
  *     summary: Delete a patient by ID
  *     tags: [Patients]
@@ -647,7 +647,7 @@
  */
 /**
  * @swagger
- * /search/{query}:
+ * /api/search/{query}:
  *   get:
  *     summary: get a patient by name, email or phone
  *     tags: [Patients]
@@ -676,7 +676,7 @@
 
 /**
  * @swagger
- * /profile/me:
+ * /api/profile/me:
  *   get:
  *     summary: Get current user's profile
  *     tags: [Profile]
@@ -691,7 +691,7 @@
 
 /**
  * @swagger
- * /profile/me:
+ * /api/profile/me:
  *   patch:
  *     summary: Update current user's profile
  *     tags: [Profile]
@@ -719,7 +719,7 @@
 
 /**
  * @swagger
- * /profile/change-password:
+ * /api/profile/change-password:
  *   patch:
  *     summary: Change current user's password
  *     tags: [Profile]
@@ -833,7 +833,7 @@
 
 /**
  * @swagger
- * /users:
+ * /api/users:
  *   get:
  *     summary: Get all users
  *     tags: [Users]
@@ -844,7 +844,7 @@
 
 /**
  * @swagger
- * /users/{id}/role:
+ * /api/users/{id}/role:
  *   patch:
  *     summary: Change user role
  *     tags: [Users]
@@ -874,7 +874,7 @@
 
 /**
  * @swagger
- * /users/{id}/status:
+ * /api/users/{id}/status:
  *   patch:
  *     summary: Activate or deactivate a user
  *     tags: [Users]
@@ -904,7 +904,7 @@
 
 /**
  * @swagger
- * /users/{id}:
+ * /api/users/{id}:
  *   delete:
  *     summary: Delete user
  *     tags: [Users]

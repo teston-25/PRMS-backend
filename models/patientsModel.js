@@ -42,6 +42,10 @@ const patientSchema = new mongoose.Schema(
     address: {
       type: String,
     },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
   },
   {
     toJSON: { virtuals: true },

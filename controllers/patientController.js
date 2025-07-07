@@ -1,7 +1,9 @@
 const Patient = require('./../models/patientsModel');
+const User = require('./../models/userModel');
 const AppError = require('./../utils/appError');
 const catchAsync = require('../middleware/catchAsync');
 const logAction = require('../utils/logAction');
+const bcrypt = require('bcryptjs');
 
 /* ================= Role Matrix =================
  Handler             Admin  Staff  Doctor  User (patient) 
@@ -25,19 +27,56 @@ exports.getPatients = catchAsync(async (req, res, next) => {
 });
 
 exports.addPatient = catchAsync(async (req, res, next) => {
-  const newPatient = await Patient.create(req.body);
+  const { email, phone, firstName, lastName } = req.body;
 
-  await logAction({
-    req,
-    action: 'Add Patient',
-    targetType: 'Patient',
-    targetId: newPatient._id,
-    details: { patientName: newPatient.name },
+  const cleanPhone = phone.replace(/\D/g, '');
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanFirstName = firstName.trim();
+
+  const existingPatient = await Patient.findOne({
+    $or: [{ email: cleanEmail }, { phone: cleanPhone }],
   });
+  if (existingPatient) return next(new AppError('Patient exists', 400));
+
+  let user = await User.findOne({
+    $or: [{ email: cleanEmail }, { phone: cleanPhone }],
+  });
+
+  let defaultPassword;
+  if (!user) {
+    defaultPassword = cleanPhone;
+
+    user = await User.create({
+      fullName: `${cleanFirstName} ${lastName}`.trim(),
+      email: cleanEmail,
+      phone: cleanPhone,
+      role: 'user',
+      password: defaultPassword,
+    });
+  }
+
+  const newPatient = await Patient.create({
+    ...req.body,
+    firstName: cleanFirstName,
+    email: cleanEmail,
+    phone: cleanPhone,
+    user: user._id,
+  });
+
+  user.patient = newPatient._id;
+  await user.save({ validateBeforeSave: false });
 
   res.status(201).json({
     status: 'success',
-    data: { patient: newPatient },
+    data: {
+      patient: newPatient,
+      loginCredentials: user
+        ? {
+            email: cleanEmail,
+            password: user.password,
+          }
+        : undefined,
+    },
   });
 });
 
@@ -99,14 +138,18 @@ exports.searchPatients = catchAsync(async (req, res, next) => {
   const { q } = req.query;
 
   if (!q) {
-    return res.status(400).json({ message: 'Query is required' });
+    return next(new AppError('Search query is required', 400));
   }
 
-  // Use regex for partial + case-insensitive search
   const regex = new RegExp(q, 'i');
 
   const results = await Patient.find({
-    $or: [{ fullName: regex }, { email: regex }, { phone: regex }],
+    $or: [
+      { firstName: regex },
+      { lastName: regex },
+      { email: regex },
+      { phone: regex },
+    ],
   });
 
   res.status(200).json({
