@@ -8,7 +8,7 @@ const logAction = require('../utils/logAction');
 |----------------|:-----:|:-----:|:------:|:----:|
  getAllUsers        ✔       ✔       ✖      ✖   
  updateUserRole     ✔       ✖       ✖      ✖   
- updateUserStatus   ✔       ✔       ✖      ✖   
+ updateUserStatus   ✔       ✖       ✖      ✖   
  deleteUser         ✔       ✖       ✖      ✖   
 ================================================= */
 

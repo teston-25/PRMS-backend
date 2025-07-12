@@ -21,10 +21,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     );
   }
 
-  // 2. Verify token
   const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-  // 3. Check if user still exists
   const currentUser = await User.findById(decoded.id);
   if (!currentUser) {
     return next(
@@ -32,7 +30,6 @@ exports.protect = catchAsync(async (req, res, next) => {
     );
   }
 
-  // 4. Grant access
   req.user = currentUser;
   next();
 });

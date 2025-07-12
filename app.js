@@ -14,6 +14,7 @@ const historyRoutes = require('./routes/historyRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const userRoutes = require('./routes/userRoutes');
 const auditRoutes = require('./routes/auditRoutes');
+const invoiceRoutes = require('./routes/invoiceRoutes');
 const cors = require('cors');
 const { apiLimiter, loginLimiter } = require('./middleware/rateLimiter');
 
@@ -50,6 +51,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api', historyRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/invoices', invoiceRoutes);
 app.use('/api/audit-logs', auditRoutes);
 
 app.use((req, res, next) => {

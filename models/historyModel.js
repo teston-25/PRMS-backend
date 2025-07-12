@@ -13,6 +13,11 @@ const historySchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  billingStatus: {
+    type: String,
+    enum: ['pending', 'paid'],
+    default: 'pending',
+  },
 });
 
 module.exports = mongoose.model('History', historySchema);
