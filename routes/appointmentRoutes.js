@@ -26,6 +26,7 @@ router
 
 router
   .route('/:id')
+  .get(restrictTo('admin', 'staff'), appointmentController.getAppointmentById)
   .patch(restrictTo('admin', 'staff'), appointmentController.updateAppointment)
   .delete(
     restrictTo('admin', 'staff'),

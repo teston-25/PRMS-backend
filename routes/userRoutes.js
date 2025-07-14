@@ -7,13 +7,15 @@ router.use(protect);
 
 router.route('/').get(restrictTo('admin', 'staff'), userController.getAllUsers);
 
+router.get('/:id', restrictTo('admin', 'staff'), userController.getUserById);
+
 router
   .route('/:id/role')
   .patch(restrictTo('admin'), userController.updateUserRole);
 
 router
   .route('/:id/status')
-  .patch(restrictTo('admin', 'staff'), userController.updateUserStatus);
+  .patch(restrictTo('admin'), userController.updateUserStatus);
 
 router.route('/:id').delete(restrictTo('admin'), userController.deleteUser);
 

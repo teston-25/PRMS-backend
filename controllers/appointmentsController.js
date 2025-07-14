@@ -11,6 +11,7 @@ const User = require('../models/userModel');
 Handler	                    Admin	Staff	Doctor  User (patient)
 |-------------------------|:----:|:--:|:----:|:--------:|
 getAppointments	            ✔     ✔    ✖     	✖
+getAppointmentById            ✔     ✔    ✖      ✖
 addAppointment	            ✔	    ✔	   ✖	    ✖
 deleteAppointment	          ✔	    ✔	   ✖	    ✖
 updateAppointment	          ✔	    ✔	   ✖	    ✖
@@ -157,7 +158,9 @@ exports.getTodayAppointments = catchAsync(async (req, res, next) => {
 
   const appointments = await Appointment.find({
     date: { $gte: startOfDay, $lte: endOfDay },
-  }).populate('patient');
+  })
+    .populate('patient')
+    .populate('assignedTo');
 
   if (appointments.length === 0)
     return next(new AppError('No Appointments found today', 404));
@@ -181,7 +184,9 @@ exports.getAppointmentsByDate = catchAsync(async (req, res, next) => {
   const { start, end } = getStartAndEndOfDay(date);
   const appointments = await Appointment.find({
     date: { $gte: start, $lte: end },
-  }).populate('patient');
+  })
+    .populate('patient')
+    .populate('assignedTo');
 
   if (appointments.length === 0)
     return next(
@@ -198,7 +203,9 @@ exports.getAppointmentsByDate = catchAsync(async (req, res, next) => {
 exports.getAppointmentsByPatient = catchAsync(async (req, res, next) => {
   const appointments = await Appointment.find({
     patient: req.params.id,
-  }).populate('patient');
+  })
+    .populate('patient')
+    .populate('assignedTo');
 
   if (!appointments || appointments.length === 0) {
     return next(new AppError('No appointments found for this patient', 404));
@@ -214,7 +221,9 @@ exports.getAppointmentsByPatient = catchAsync(async (req, res, next) => {
 exports.getMyAppointments = catchAsync(async (req, res, next) => {
   const appointments = await Appointment.find({
     assignedTo: req.user._id,
-  }).populate('patient');
+  })
+    .populate('patient')
+    .populate('assignedTo');
 
   res.status(200).json({
     status: 'success',
@@ -263,6 +272,7 @@ exports.getTodayMyAppointments = catchAsync(async (req, res, next) => {
     date: { $gte: startOfDay, $lte: endOfDay },
   })
     .populate('patient')
+    .populate('assignedTo')
     .limit(10);
 
   if (!appointments.length)
@@ -272,5 +282,20 @@ exports.getTodayMyAppointments = catchAsync(async (req, res, next) => {
     status: 'success',
     results: appointments.length,
     data: { appointments },
+  });
+});
+
+exports.getAppointmentById = catchAsync(async (req, res, next) => {
+  const appointment = await Appointment.findById(req.params.id)
+    .populate('patient')
+    .populate('assignedTo');
+
+  if (!appointment) {
+    return next(new AppError('No appointment found with that ID', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: { appointment },
   });
 });
