@@ -6,7 +6,10 @@ const { protect, restrictTo } = require('../middleware/protect');
 router.use(protect, restrictTo('admin'));
 
 router.get('/', async (req, res) => {
-  const logs = await AuditLog.find().sort({ createdAt: -1 }).limit(100);
+  const logs = await AuditLog.find()
+    .sort({ createdAt: -1 })
+    .limit(100)
+    .populate('user', 'fullName email');
 
   res.status(200).json({
     status: 'success',

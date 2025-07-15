@@ -4,7 +4,7 @@ const invoiceController = require('../controllers/invoiceController');
 const { protect, restrictTo } = require('../middleware/protect');
 
 router.use(protect);
-router.get('/', invoiceController.getInvoices);
+router.get('/', restrictTo('admin', 'staff'), invoiceController.getInvoices);
 router.post('/', restrictTo('doctor'), invoiceController.createInvoice);
 router.patch(
   '/:id/pay',

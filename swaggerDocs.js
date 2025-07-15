@@ -976,6 +976,168 @@
  *         description: User deleted
  */
 
+// ##################################################   Invoices  ###############################################
+
+/**
+ * @swagger
+ * tags:
+ *   name: Invoices
+ *   description: Dental clinic invoice management
+ */
+
+/**
+ * @swagger
+ * /invoices:
+ *   get:
+ *     summary: Get all invoices
+ *     description: Retrieve a list of all invoices (accessible to authenticated users)
+ *     tags: [Invoices]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: A list of invoices
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Invoice'
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /invoices:
+ *   post:
+ *     summary: Create a new invoice
+ *     description: Create a new invoice (doctor role required)
+ *     tags: [Invoices]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/InvoiceInput'
+ *     responses:
+ *       201:
+ *         description: Invoice created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Invoice'
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (doctor role required)
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * /invoices/{id}/pay:
+ *   patch:
+ *     summary: Mark invoice as paid
+ *     description: Update invoice payment status (staff role required)
+ *     tags: [Invoices]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The invoice ID
+ *     responses:
+ *       200:
+ *         description: Invoice marked as paid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Invoice'
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (staff role required)
+ *       404:
+ *         description: Invoice not found
+ *       500:
+ *         description: Internal server error
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Invoice:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: '507f1f77bcf86cd799439011'
+ *         patient:
+ *           type: string
+ *           example: '507f191e810c19729de860ea'
+ *         amount:
+ *           type: number
+ *           example: 150.50
+ *         services:
+ *           type: array
+ *           items:
+ *             type: string
+ *           example: ["Tooth Extraction", "Consultation"]
+ *         isPaid:
+ *           type: boolean
+ *           example: false
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           example: '2025-07-14T10:30:00Z'
+ *         paidAt:
+ *           type: string
+ *           format: date-time
+ *           example: '2025-07-15T14:45:00Z'
+ *
+ *     InvoiceInput:
+ *       type: object
+ *       required:
+ *         - patient
+ *         - amount
+ *         - services
+ *       properties:
+ *         patient:
+ *           type: string
+ *           example: '507f191e810c19729de860ea'
+ *         amount:
+ *           type: number
+ *           example: 150.50
+ *         services:
+ *           type: array
+ *           items:
+ *             type: string
+ *           example: ["Tooth Extraction", "Consultation"]
+ *         notes:
+ *           type: string
+ *           example: "Patient requires follow-up in 2 weeks"
+ *
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+
 // ##################################################   audit log  ###############################################
 
 /**

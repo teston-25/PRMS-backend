@@ -19,7 +19,8 @@ exports.getSummaryReport = catchAsync(async (req, res, next) => {
   const latestAppointments = await Appointment.find()
     .sort({ date: -1 })
     .limit(5)
-    .populate('patient');
+    .populate('patient')
+    .populate('assignedTo');
 
   res.status(200).json({
     status: 'success',
@@ -43,7 +44,9 @@ exports.getAppointmentsByDateRange = catchAsync(async (req, res, next) => {
 
   const appointments = await Appointment.find({
     date: { $gte: start, $lte: end },
-  }).populate('patient');
+  })
+    .populate('patient')
+    .populate('assignedTo');
 
   res.status(200).json({
     status: 'success',
