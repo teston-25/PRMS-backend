@@ -4,6 +4,7 @@ const AppError = require('./../utils/appError');
 const catchAsync = require('../middleware/catchAsync');
 const logAction = require('../utils/logAction');
 const bcrypt = require('bcryptjs');
+const emailVerify = require('../utils/emailVerify');
 
 /* ================= Role Matrix =================
  Handler             Admin  Staff  Doctor  User (patient) 
