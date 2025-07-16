@@ -987,7 +987,7 @@
 
 /**
  * @swagger
- * /invoices:
+ * /api/invoices:
  *   get:
  *     summary: Get all invoices
  *     description: Retrieve a list of all invoices (accessible to authenticated users)
@@ -1011,7 +1011,7 @@
 
 /**
  * @swagger
- * /invoices:
+ * /api/invoices:
  *   post:
  *     summary: Create a new invoice
  *     description: Create a new invoice (doctor role required)
@@ -1043,7 +1043,7 @@
 
 /**
  * @swagger
- * /invoices/{id}/pay:
+ * /api/invoices/{id}/pay:
  *   patch:
  *     summary: Mark invoice as paid
  *     description: Update invoice payment status (staff role required)
@@ -1074,68 +1074,6 @@
  *         description: Invoice not found
  *       500:
  *         description: Internal server error
- */
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     Invoice:
- *       type: object
- *       properties:
- *         id:
- *           type: string
- *           example: '507f1f77bcf86cd799439011'
- *         patient:
- *           type: string
- *           example: '507f191e810c19729de860ea'
- *         amount:
- *           type: number
- *           example: 150.50
- *         services:
- *           type: array
- *           items:
- *             type: string
- *           example: ["Tooth Extraction", "Consultation"]
- *         isPaid:
- *           type: boolean
- *           example: false
- *         createdAt:
- *           type: string
- *           format: date-time
- *           example: '2025-07-14T10:30:00Z'
- *         paidAt:
- *           type: string
- *           format: date-time
- *           example: '2025-07-15T14:45:00Z'
- *
- *     InvoiceInput:
- *       type: object
- *       required:
- *         - patient
- *         - amount
- *         - services
- *       properties:
- *         patient:
- *           type: string
- *           example: '507f191e810c19729de860ea'
- *         amount:
- *           type: number
- *           example: 150.50
- *         services:
- *           type: array
- *           items:
- *             type: string
- *           example: ["Tooth Extraction", "Consultation"]
- *         notes:
- *           type: string
- *           example: "Patient requires follow-up in 2 weeks"
- *
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
  */
 
 // ##################################################   audit log  ###############################################

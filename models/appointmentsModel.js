@@ -5,6 +5,20 @@ const appointmentSchema = new mongoose.Schema(
     date: {
       type: Date,
       required: [true, 'Appointment date is required'],
+      validate: {
+        validator: function (date) {
+          // Get current date (without time)
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          // Get appointment date (without time)
+          const appointmentDate = new Date(date);
+          appointmentDate.setHours(0, 0, 0, 0);
+
+          return appointmentDate >= today;
+        },
+        message: 'Appointment date cannot be in the past',
+      },
     },
     reason: {
       type: String,

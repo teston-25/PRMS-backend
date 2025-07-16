@@ -18,6 +18,22 @@ const patientSchema = new mongoose.Schema(
     dob: {
       type: Date,
       required: [true, 'Date of birth is required'],
+      validate: {
+        validator: function (dob) {
+          // Calculate the minimum date (7 years ago from now)
+          const minDate = new Date();
+          minDate.setFullYear(minDate.getFullYear() - 7);
+
+          // Calculate the maximum reasonable date (e.g., 120 years ago)
+          const maxDate = new Date();
+          maxDate.setFullYear(maxDate.getFullYear() - 120);
+
+          // Date must be before minDate (at least 5 years old) and after maxDate
+          return dob <= minDate && dob >= maxDate;
+        },
+        message:
+          'Patient must be at least 7 years old and date must be reasonable',
+      },
     },
     gender: {
       type: String,
@@ -33,11 +49,23 @@ const patientSchema = new mongoose.Schema(
       required: [true, 'Email is required'],
       lowercase: true,
       unique: true,
+      validate: {
+        validator: validator.isEmail,
+        message: (props) => `${props.value} is not a valid email address!`,
+      },
     },
     phone: {
-      type: String,
+      type: Number,
       required: [true, 'Phone number is required'],
       unique: true,
+      validate: {
+        validator: function (v) {
+          // Check if positive number and exactly 9 digits
+          return v > 0 && v.toString().length === 9;
+        },
+        message: (props) =>
+          `${props.value} is not valid! Phone must be a positive 9-digit number.`,
+      },
     },
     address: {
       type: String,

@@ -23,7 +23,8 @@ exports.getInvoices = catchAsync(async (req, res, next) => {
   }
 
   const invoices = await Invoice.find(filter)
-    .populate('patient', 'firstName lastName email phone')
+    .populate('patient')
+    .populate('medicalHistory')
     .sort({ createdAt: -1 });
 
   res.status(200).json({

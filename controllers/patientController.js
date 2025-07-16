@@ -27,27 +27,41 @@ exports.getPatients = catchAsync(async (req, res, next) => {
 });
 
 exports.addPatient = catchAsync(async (req, res, next) => {
-  const { email, phone, firstName, lastName } = req.body;
+  const { email, phone, firstName, lastName, dob, gender, address } = req.body;
 
-  const cleanPhone = phone.replace(/\D/g, '');
+  // 1. Clean input data
+  const cleanPhone = phone.toString().replace(/\D/g, '');
   const cleanEmail = email.trim().toLowerCase();
   const cleanFirstName = firstName.trim();
+  const cleanLastName = lastName.trim();
 
+  // 2. Validate email format and verify
+  const isVerified = await emailVerify(cleanEmail);
+  if (isVerified.success === false) {
+    return next(new AppError('Invalid email: please use a valid email', 400));
+  }
+
+  // 3. Check if patient already exists
   const existingPatient = await Patient.findOne({
     $or: [{ email: cleanEmail }, { phone: cleanPhone }],
   });
-  if (existingPatient) return next(new AppError('Patient exists', 400));
+  if (existingPatient) {
+    return next(
+      new AppError('Patient with this email or phone already exists', 400)
+    );
+  }
 
+  // 4. Check if user exists or create new one
   let user = await User.findOne({
     $or: [{ email: cleanEmail }, { phone: cleanPhone }],
   });
 
   let defaultPassword;
   if (!user) {
-    defaultPassword = cleanPhone;
+    defaultPassword = cleanPhone; // Using phone as default password
 
     user = await User.create({
-      fullName: `${cleanFirstName} ${lastName}`.trim(),
+      fullName: `${cleanFirstName} ${cleanLastName}`.trim(),
       email: cleanEmail,
       phone: cleanPhone,
       role: 'user',
@@ -55,27 +69,48 @@ exports.addPatient = catchAsync(async (req, res, next) => {
     });
   }
 
+  // 5. Create new patient
   const newPatient = await Patient.create({
-    ...req.body,
     firstName: cleanFirstName,
+    lastName: cleanLastName,
     email: cleanEmail,
     phone: cleanPhone,
+    dob,
+    gender,
+    address,
     user: user._id,
   });
 
+  // 6. Link patient to user
   user.patient = newPatient._id;
   await user.save({ validateBeforeSave: false });
 
+  // 7. Log the action
+  await logAction({
+    req,
+    actor: req.user, // Assuming the current user is creating the patient
+    action: 'Patient Created',
+    targetType: 'Patient',
+    targetId: newPatient._id,
+  });
+
+  // 8. Send response
   res.status(201).json({
     status: 'success',
+    message: 'Patient created successfully',
+    emailStatus: isVerified.message,
     data: {
-      patient: newPatient,
-      loginCredentials: user
-        ? {
-            email: cleanEmail,
-            password: user.password,
-          }
-        : undefined,
+      patient: {
+        id: newPatient._id,
+        firstName: newPatient.firstName,
+        lastName: newPatient.lastName,
+        email: newPatient.email,
+      },
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+      },
     },
   });
 });
