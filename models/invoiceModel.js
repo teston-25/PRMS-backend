@@ -9,17 +9,17 @@ const invoiceSchema = new mongoose.Schema(
     },
     medicalHistory: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'MedicalHistory',
+      ref: 'History',
       required: true,
     },
     issuedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Doctor',
+      ref: 'User',
       required: true,
     },
     issuedTo: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'staff',
+      ref: 'User',
     },
     services: [
       {
