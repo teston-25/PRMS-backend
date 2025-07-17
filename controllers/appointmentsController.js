@@ -84,7 +84,7 @@ exports.addAppointment = catchAsync(async (req, res, next) => {
     date,
     assignedTo,
     reason,
-  });
+  }).then((doc) => doc.populate([{ path: 'patient' }, { path: 'assignedTo' }]));
 
   await logAction({
     req,
