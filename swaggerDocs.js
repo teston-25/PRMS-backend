@@ -856,25 +856,129 @@
  * @swagger
  * tags:
  *   name: Users
- *   description: User and role management
+ *   description: User management endpoints
  */
 
 /**
  * @swagger
- * /api/users:
- *   get:
- *     summary: Get all users
- *     tags: [Users]
- *     responses:
- *       200:
- *         description: List of users
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           example: 5f8d0d55b54764421b7156da
+ *         name:
+ *           type: string
+ *           example: John Doe
+ *         email:
+ *           type: string
+ *           example: john@example.com
+ *         role:
+ *           type: string
+ *           enum: [admin, staff, doctor, user]
+ *           example: user
+ *         active:
+ *           type: boolean
+ *           example: true
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           example: 2023-01-01T00:00:00.000Z
+ *     UserUpdate:
+ *       type: object
+ *       properties:
+ *         role:
+ *           type: string
+ *           enum: [admin, staff, doctor, user]
+ *           example: doctor
+ *           description: New user role (optional)
+ *         active:
+ *           type: boolean
+ *           example: false
+ *           description: Account status (optional)
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  */
 
 /**
  * @swagger
  * /api/users/{id}:
+ *   patch:
+ *     summary: Update user role and/or status
+ *     description: |
+ *       Update user properties (role and/or active status).
+ *       Requires admin privileges.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: MongoDB user ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UserUpdate'
+ *           examples:
+ *             roleUpdate:
+ *               summary: Update role only
+ *               value:
+ *                 role: doctor
+ *             statusUpdate:
+ *               summary: Update status only
+ *               value:
+ *                 active: false
+ *             bothUpdate:
+ *               summary: Update both role and status
+ *               value:
+ *                 role: staff
+ *                 active: true
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 message:
+ *                   type: string
+ *                   example: User role and status updated successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Invalid input data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Unauthorized (missing or invalid token)
+ *       403:
+ *         description: Forbidden (insufficient permissions)
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ *
  *   get:
- *     summary: Get a specific user by ID
+ *     summary: Get user details
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -895,75 +999,13 @@
  *       404:
  *         description: User not found
  *       401:
- *         description: Unauthorized - requires admin or staff role
- */
-
-/**
- * @swagger
- * /api/users/{id}/role:
- *   patch:
- *     summary: Change user role
- *     tags: [Users]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: User ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - role
- *             properties:
- *               role:
- *                 type: string
- *                 example: staff
- *     responses:
- *       200:
- *         description: Role updated
- */
-
-/**
- * @swagger
- * /api/users/{id}/status:
- *   patch:
- *     summary: Activate or deactivate a user
- *     tags: [Users]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: User ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - active
- *             properties:
- *               active:
- *                 type: boolean
- *                 example: false
- *     responses:
- *       200:
- *         description: User status updated
- */
-
-/**
- * @swagger
- * /api/users/{id}:
+ *         description: Unauthorized
+ *
  *   delete:
  *     summary: Delete user
  *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -973,7 +1015,71 @@
  *         description: User ID
  *     responses:
  *       204:
- *         description: User deleted
+ *         description: User deleted successfully
+ *       404:
+ *         description: User not found
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /api/users:
+ *   get:
+ *     summary: Get all users
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: role
+ *         schema:
+ *           type: string
+ *           enum: [admin, staff, doctor, user]
+ *         description: Filter by role
+ *       - in: query
+ *         name: active
+ *         schema:
+ *           type: boolean
+ *         description: Filter by active status
+ *     responses:
+ *       200:
+ *         description: List of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: success
+ *                 results:
+ *                   type: integer
+ *                   example: 5
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Error:
+ *       type: object
+ *       properties:
+ *         status:
+ *           type: string
+ *           example: error
+ *         message:
+ *           type: string
+ *           example: Invalid role specified
+ *         stack:
+ *           type: string
+ *           example: Error: Invalid role...
  */
 
 // ##################################################   Invoices  ###############################################

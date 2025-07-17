@@ -39,65 +39,74 @@ exports.getUserById = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.updateUserRole = catchAsync(async (req, res, next) => {
-  const { role } = req.body;
-  if (!['admin', 'staff', 'user', 'doctor'].includes(role)) {
+exports.updateUser = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const { role, active } = req.body;
+
+  // Validate at least one field is being updated
+  if (role === undefined && active === undefined) {
+    return next(new AppError('No update fields provided', 400));
+  }
+
+  // Validate role if provided
+  if (role && !['admin', 'staff', 'user', 'doctor'].includes(role)) {
     return next(new AppError('Invalid role', 400));
   }
 
-  const prevUser = await User.findById(req.params.id);
-  if (!prevUser) return next(new AppError('user not found', 404));
+  // Get previous user data
+  const prevUser = await User.findById(id);
+  if (!prevUser) return next(new AppError('User not found', 404));
 
-  const user = await User.findByIdAndUpdate(
-    req.params.id,
-    { role },
-    { new: true }
-  );
-  if (!user) return next(new AppError('user not found', 404));
+  // Prepare update object
+  const updateData = {};
+  if (role !== undefined) updateData.role = role;
+  if (active !== undefined) updateData.active = active;
+
+  // Perform the update
+  const user = await User.findByIdAndUpdate(id, updateData, {
+    new: true,
+    runValidators: true,
+  });
+
+  // Log actions for both possible changes
+  const logDetails = {};
+  if (role !== undefined) {
+    logDetails.roleChange = {
+      from: prevUser.role,
+      to: user.role,
+    };
+  }
+  if (active !== undefined) {
+    logDetails.statusChange = {
+      from: prevUser.active,
+      to: user.active,
+    };
+  }
 
   await logAction({
     req,
-    action: 'Update User Role',
+    action: 'Update User',
     targetType: 'User',
     targetId: user._id,
-    details: { oldRole: prevUser.role, newRole: user.role },
+    details: logDetails,
   });
+
+  // Prepare response message
+  let message = 'User updated successfully';
+  if (role !== undefined && active !== undefined) {
+    message = 'User role and status updated successfully';
+  } else if (role !== undefined) {
+    message = 'User role updated successfully';
+  } else if (active !== undefined) {
+    message = 'User status updated successfully';
+  }
 
   res.status(200).json({
     status: 'success',
-    message: 'user role updated successfully',
+    message,
     data: {
       user,
     },
-  });
-});
-
-exports.updateUserStatus = catchAsync(async (req, res, next) => {
-  const { active } = req.body;
-
-  const prevUser = await User.findById(req.params.id);
-  if (!prevUser) return next(new AppError('user not found', 404));
-
-  const user = await User.findByIdAndUpdate(
-    req.params.id,
-    { active },
-    { new: true }
-  );
-
-  if (!user) return next(new AppError('user not found', 404));
-
-  await logAction({
-    req,
-    action: 'Update User Status',
-    targetType: 'User',
-    targetId: user._id,
-    details: { oldStatus: prevUser.active, newStatus: user.active },
-  });
-
-  res.status(200).json({
-    status: 'success',
-    message: 'user status updated successfully',
-    user,
   });
 });
 

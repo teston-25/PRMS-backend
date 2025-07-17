@@ -162,8 +162,8 @@ exports.getTodayAppointments = catchAsync(async (req, res, next) => {
     .populate('patient')
     .populate('assignedTo');
 
-  if (appointments.length === 0)
-    return next(new AppError('No Appointments found today', 404));
+  // if (appointments.length === 0)
+  //   return next(new AppError('No Appointments found today', 404));
 
   res.status(200).json({
     status: 'success',
@@ -275,8 +275,8 @@ exports.getTodayMyAppointments = catchAsync(async (req, res, next) => {
     .populate('assignedTo')
     .limit(10);
 
-  if (!appointments.length)
-    return next(new AppError('No appointments for you today', 404));
+  // if (!appointments.length)
+  //   return next(new AppError('No appointments for you today', 404));
 
   res.status(200).json({
     status: 'success',
