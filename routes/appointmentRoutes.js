@@ -6,6 +6,10 @@ const { protect, restrictTo } = require('../middleware/protect');
 router.use(protect);
 
 router
+  .route('/my-appointments')
+  .get(restrictTo('doctor', 'staff'), appointmentController.getMyAppointments);
+
+router
   .route('/')
   .get(restrictTo('admin', 'staff'), appointmentController.getAppointments)
   .post(restrictTo('admin', 'staff'), appointmentController.addAppointment);

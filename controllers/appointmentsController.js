@@ -11,7 +11,7 @@ const User = require('../models/userModel');
 Handler	                    Admin	Staff	Doctor  User (patient)
 |-------------------------|:----:|:--:|:----:|:--------:|
 getAppointments	            ✔     ✔    ✖     	✖
-getAppointmentById            ✔     ✔    ✖      ✖
+getAppointmentById          ✔     ✔    ✖      ✖
 addAppointment	            ✔	    ✔	   ✖	    ✖
 deleteAppointment	          ✔	    ✔	   ✖	    ✖
 updateAppointment	          ✔	    ✔	   ✖	    ✖
