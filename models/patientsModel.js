@@ -49,10 +49,10 @@ const patientSchema = new mongoose.Schema(
       required: [true, 'Email is required'],
       lowercase: true,
       unique: true,
-      validate: {
-        validator: validator.isEmail,
-        message: (props) => `${props.value} is not a valid email address!`,
-      },
+      // validate: {
+      //   validator: validator.isEmail,
+      //   message: (props) => `${props.value} is not a valid email address!`,
+      // },
     },
     phone: {
       type: Number,
