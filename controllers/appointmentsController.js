@@ -24,13 +24,23 @@ getTodayMyAppointments	    ✖	    ✔	   ✔	    ✖
 ================================================= */
 
 exports.getAppointments = catchAsync(async (req, res, next) => {
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 20;
+  const skip = (page - 1) * limit;
+
+  const total = await Appointment.countDocuments();
   const appointments = await Appointment.find()
     .populate('patient')
-    .populate('assignedTo');
+    .populate('assignedTo')
+    .skip(skip)
+    .limit(limit);
 
   res.status(200).json({
     status: 'success',
     results: appointments.length,
+    total,
+    page,
+    totalPages: Math.ceil(total / limit),
     data: { appointments },
   });
 });
@@ -40,7 +50,7 @@ exports.addAppointment = catchAsync(async (req, res, next) => {
 
   if (!patientData.email && !patientData.phone) {
     return next(
-      new AppError('Email or phone is required to identify patient', 400)
+      new AppError('Email or phone is required to identify patient', 400),
     );
   }
 
@@ -61,7 +71,7 @@ exports.addAppointment = catchAsync(async (req, res, next) => {
   const MAX_DAILY_APPOINTMENTS = 30;
   if (existingCount >= MAX_DAILY_APPOINTMENTS) {
     return next(
-      new AppError('This doctor already has 30 appointments on this day.', 400)
+      new AppError('This doctor already has 30 appointments on this day.', 400),
     );
   }
 
@@ -127,7 +137,7 @@ exports.updateAppointment = catchAsync(async (req, res, next) => {
   const updatedAppointment = await Appointment.findByIdAndUpdate(
     req.params.id,
     req.body,
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   );
 
   if (!updatedAppointment) {
@@ -177,7 +187,7 @@ exports.getAppointmentsByDate = catchAsync(async (req, res, next) => {
 
   if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return next(
-      new AppError('Invalid or missing date. Format: YYYY-MM-DD', 400)
+      new AppError('Invalid or missing date. Format: YYYY-MM-DD', 400),
     );
   }
 
@@ -190,7 +200,7 @@ exports.getAppointmentsByDate = catchAsync(async (req, res, next) => {
 
   if (appointments.length === 0)
     return next(
-      new AppError(`No Appointments found by this date: ${date}`, 404)
+      new AppError(`No Appointments found by this date: ${date}`, 404),
     );
 
   res.status(200).json({
@@ -239,7 +249,7 @@ exports.updateAppointmentStatus = catchAsync(async (req, res, next) => {
 
   if (appointment.assignedTo.toString() !== req.user._id.toString()) {
     return next(
-      new AppError('You are not authorized to update this appointment', 403)
+      new AppError('You are not authorized to update this appointment', 403),
     );
   }
 

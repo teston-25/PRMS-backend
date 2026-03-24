@@ -44,8 +44,13 @@ const appointmentSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
+
+appointmentSchema.index({ date: 1 });
+appointmentSchema.index({ assignedTo: 1 });
+appointmentSchema.index({ patient: 1 });
+appointmentSchema.index({ assignedTo: 1, date: 1 }); // compound for getMyAppointments + date filter
 
 const Appointment = mongoose.model('Appointment', appointmentSchema);
 module.exports = Appointment;

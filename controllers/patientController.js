@@ -17,11 +17,19 @@ const emailVerify = require('../utils/emailVerify');
 ================================================= */
 
 exports.getPatients = catchAsync(async (req, res, next) => {
-  const patients = await Patient.find();
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 20;
+  const skip = (page - 1) * limit;
+
+  const total = await Patient.countDocuments();
+  const patients = await Patient.find().skip(skip).limit(limit);
 
   res.status(200).json({
     status: 'success',
     results: patients.length,
+    total,
+    page,
+    totalPages: Math.ceil(total / limit),
     data: { patients },
   });
 });
@@ -47,7 +55,7 @@ exports.addPatient = catchAsync(async (req, res, next) => {
   });
   if (existingPatient) {
     return next(
-      new AppError('Patient with this email or phone already exists', 400)
+      new AppError('Patient with this email or phone already exists', 400),
     );
   }
 
@@ -117,7 +125,7 @@ exports.addPatient = catchAsync(async (req, res, next) => {
 
 exports.getSinglePatient = catchAsync(async (req, res, next) => {
   const patient = await Patient.findById(req.params.id).populate(
-    'appointments'
+    'appointments',
   );
 
   if (!patient) return next(new AppError('Patient not found', 404));
@@ -129,7 +137,21 @@ exports.getSinglePatient = catchAsync(async (req, res, next) => {
 });
 
 exports.updatePatient = catchAsync(async (req, res, next) => {
-  const patient = await Patient.findByIdAndUpdate(req.params.id, req.body, {
+  const allowedFields = [
+    'firstName',
+    'lastName',
+    'email',
+    'phone',
+    'dob',
+    'gender',
+    'address',
+  ];
+  const filtered = {};
+  Object.keys(req.body).forEach((key) => {
+    if (allowedFields.includes(key)) filtered[key] = req.body[key];
+  });
+
+  const patient = await Patient.findByIdAndUpdate(req.params.id, filtered, {
     new: true,
     runValidators: true,
   });
@@ -176,7 +198,8 @@ exports.searchPatients = catchAsync(async (req, res, next) => {
     return next(new AppError('Search query is required', 400));
   }
 
-  const regex = new RegExp(q, 'i');
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(escaped, 'i');
 
   const results = await Patient.find({
     $or: [

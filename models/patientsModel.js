@@ -49,22 +49,22 @@ const patientSchema = new mongoose.Schema(
       required: [true, 'Email is required'],
       lowercase: true,
       unique: true,
-      // validate: {
-      //   validator: validator.isEmail,
-      //   message: (props) => `${props.value} is not a valid email address!`,
-      // },
+      validate: {
+        validator: validator.isEmail,
+        message: (props) => `${props.value} is not a valid email address!`,
+      },
     },
     phone: {
-      type: Number,
+      type: String,
       required: [true, 'Phone number is required'],
       unique: true,
       validate: {
-         validator: function (v) {  
-      return v > 0 && v.toString().length === 9;  
-    },  
-    message: (props) =>  
-      `${props.value} is not valid! Phone must be a positive 9-digit number.`,  
-  },  
+        validator: function (v) {
+          return /^\d{9}$/.test(v);
+        },
+        message: (props) =>
+          `${props.value} is not valid! Phone must be exactly 9 digits.`,
+      },
     },
     address: {
       type: String,
@@ -77,7 +77,7 @@ const patientSchema = new mongoose.Schema(
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 patientSchema.virtual('age').get(function () {

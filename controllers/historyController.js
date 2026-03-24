@@ -32,7 +32,7 @@ exports.addMedicalHistory = catchAsync(async (req, res, next) => {
     action: 'Add Medical History Entry',
     targetType: 'Patient',
     targetId: req.params.id,
-    details: { AddedHistroy: newEntry._id },
+    details: { AddedHistory: newEntry._id },
   });
 
   res.status(201).json({

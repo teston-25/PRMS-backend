@@ -6,6 +6,9 @@ const globalErrorHandler = require('./controllers/errorController');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./utils/swagger');
 
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+
 const patientRoutes = require('./routes/patientRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const profileRoutes = require('./routes/profileRoutes');
@@ -20,13 +23,20 @@ const { apiLimiter, loginLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
 
+app.use(helmet());
+app.use(mongoSanitize());
+
 app.set('trust proxy', 1);
+const allowedOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',')
+  : ['https://prms-psi.vercel.app'];
+
 app.use(
   cors({
-    origin: ['https://prms-psi.vercel.app'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-  })
+  }),
 );
 
 app.use(morgan('dev'));
@@ -41,11 +51,15 @@ app.get('/', (req, res) => {
   res.send('🎉 Welcome to the Backend API!');
 });
 
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/patient', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/profile', profileRoutes);
-app.use('/api', historyRoutes);
+app.use('/api/sistory', historyRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/invoices', invoiceRoutes);

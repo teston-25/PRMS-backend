@@ -9,15 +9,15 @@ router
   .get(restrictTo('admin', 'staff'), patientController.getPatients)
   .post(restrictTo('admin', 'staff'), patientController.addPatient);
 router
+  .route('/search')
+  .get(restrictTo('admin', 'staff'), patientController.searchPatients);
+router
   .route('/:id')
   .get(
     restrictTo('admin', 'staff', 'doctor', 'user'),
-    patientController.getSinglePatient
+    patientController.getSinglePatient,
   )
   .patch(restrictTo('admin', 'staff'), patientController.updatePatient)
   .delete(restrictTo('admin', 'staff'), patientController.deletePatient);
-router
-  .route('/patients/search')
-  .get(restrictTo('admin', 'staff'), patientController.searchPatients);
 
 module.exports = router;

@@ -20,7 +20,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   if (exists) {
     return next(new AppError('Email already exists', 400));
   }
-  const user = await User.create({ fullName, email, password, role });
+  const user = await User.create({ fullName, email, password, role: 'user' });
   const token = generateToken(user);
 
   await logAction({

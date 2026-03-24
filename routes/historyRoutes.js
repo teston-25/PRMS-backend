@@ -6,22 +6,22 @@ const { protect, restrictTo } = require('../middleware/protect');
 router.use(protect);
 
 router
-  .route('/patients/:id/history')
+  .route('/:patientId')
   .get(historyController.getMedicalHistory)
   .post(
     restrictTo('doctor', 'staff', 'admin'),
-    historyController.addMedicalHistory
+    historyController.addMedicalHistory,
   );
 router
   .patch(
-    '/history/:id',
+    '/:patientId',
     restrictTo('doctor', 'staff', 'admin'),
-    historyController.updateMedicalHistory
+    historyController.updateMedicalHistory,
   )
   .delete(
-    '/history/:id',
+    '/:patientId',
     restrictTo('staff', 'admin'),
-    historyController.deleteMedicalHistory
+    historyController.deleteMedicalHistory,
   );
 
 module.exports = router;

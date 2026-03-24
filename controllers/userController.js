@@ -14,10 +14,18 @@ const logAction = require('../utils/logAction');
 ================================================= */
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find();
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 20;
+  const skip = (page - 1) * limit;
+
+  const total = await User.countDocuments();
+  const users = await User.find().skip(skip).limit(limit);
   res.status(200).json({
     status: 'success',
     results: users.length,
+    total,
+    page,
+    totalPages: Math.ceil(total / limit),
     data: {
       users,
     },
