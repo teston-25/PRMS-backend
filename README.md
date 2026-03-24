@@ -272,7 +272,7 @@ PRMS-backend/
 
 ### API Protection
 
-- Rate limiting: 500 requests/hour for general API, 500 requests/hour for authentication
+- Rate limiting: 100 requests/hour for general API, 10 requests/hour for authentication
 - CORS configuration restricted to allowed origins
 - Centralized validation error handling
 - Comprehensive audit logging for all state-changing operations

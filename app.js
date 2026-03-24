@@ -24,12 +24,17 @@ const { apiLimiter, loginLimiter } = require('./middleware/rateLimiter');
 const app = express();
 
 app.use(helmet());
-app.use(mongoSanitize());
+app.use((req, res, next) => {
+  if (req.body) {
+    req.body = mongoSanitize.sanitize(req.body);
+  }
+  next();
+});
 
 app.set('trust proxy', 1);
 const allowedOrigins = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(',')
-  : ['https://prms-psi.vercel.app'];
+  : ['https://prms-snc.vercel.app'];
 
 app.use(
   cors({
@@ -59,7 +64,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/patient', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/profile', profileRoutes);
-app.use('/api/sistory', historyRoutes);
+app.use('/api/History', historyRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/invoices', invoiceRoutes);

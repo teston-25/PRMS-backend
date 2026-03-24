@@ -1,5 +1,3 @@
-// AI based documentation for current working api
-
 // ##################################################   authRoute ###############################################
 
 /**
@@ -1079,7 +1077,7 @@
  *           example: Invalid role specified
  *         stack:
  *           type: string
- *           example: Error: Invalid role...
+ *           example: "Error: Invalid role..."
  */
 
 // ##################################################   Invoices  ###############################################

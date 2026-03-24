@@ -13,7 +13,7 @@ Delete Medical History	  ✘	    ✘	      ✔	    ✔
 =====================================================*/
 
 exports.getMedicalHistory = catchAsync(async (req, res, next) => {
-  const history = await History.find({ patient: req.params.id });
+  const history = await History.find({ patient: req.params.patientid });
   res.status(200).json({
     status: 'success',
     result: history.length,
@@ -42,9 +42,13 @@ exports.addMedicalHistory = catchAsync(async (req, res, next) => {
 });
 
 exports.updateMedicalHistory = catchAsync(async (req, res, next) => {
-  const updated = await History.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
+  const updated = await History.findByIdAndUpdate(
+    req.params.patientid,
+    req.body,
+    {
+      new: true,
+    },
+  );
   if (!updated) return next(new AppError('Entry not found', 404));
 
   await logAction({
@@ -62,7 +66,7 @@ exports.updateMedicalHistory = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteMedicalHistory = catchAsync(async (req, res, next) => {
-  const deleted = await History.findByIdAndDelete(req.params.id);
+  const deleted = await History.findByIdAndDelete(req.params.patientid);
   if (!deleted) return next(new AppError('Entry not found', 404));
 
   await logAction({
