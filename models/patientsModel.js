@@ -60,7 +60,7 @@ const patientSchema = new mongoose.Schema(
       unique: true,
       validate: {
         validator: function (v) {
-          return /^\d{9}$/.test(v);
+          return /^(\+251|0)?\d{9}$/.test(v);
         },
         message: (props) =>
           `${props.value} is not valid! Phone must be exactly 9 digits.`,

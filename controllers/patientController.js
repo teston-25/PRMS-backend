@@ -1,4 +1,7 @@
 const Patient = require('./../models/patientsModel');
+const Appointment = require('./../models/appointmentsModel');
+const History = require('./../models/historyModel');
+const Invoice = require('./../models/invoiceModel');
 const User = require('./../models/userModel');
 const AppError = require('./../utils/appError');
 const catchAsync = require('../middleware/catchAsync');
@@ -176,6 +179,13 @@ exports.deletePatient = catchAsync(async (req, res, next) => {
   const patient = await Patient.findByIdAndDelete(req.params.id);
 
   if (!patient) return next(new AppError('Patient not found', 404));
+
+  await Promise.all([
+    Appointment.deleteMany({ patient: patient._id }),
+    History.deleteMany({ patient: patient._id }),
+    User.deleteMany({ patient: patient._id }),
+    Invoice.deleteMany({ patient: patient._id }),
+  ]);
 
   await logAction({
     req,

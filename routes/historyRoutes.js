@@ -14,12 +14,12 @@ router
   );
 router
   .patch(
-    '/:patientId',
+    '/:historyId',
     restrictTo('doctor', 'staff', 'admin'),
     historyController.updateMedicalHistory,
   )
   .delete(
-    '/:patientId',
+    '/:historyId',
     restrictTo('staff', 'admin'),
     historyController.deleteMedicalHistory,
   );

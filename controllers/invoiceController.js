@@ -4,11 +4,11 @@ const catchAsync = require('../middleware/catchAsync');
 const AppError = require('../utils/appError');
 
 /** ================= Role Matrix =================
- Handler           Admin  Staff  Doctor  User 
-|----------------|:-----:|:-----:|:------:|:----:|
- createinvoice       ✖       ✖      ✔      ✖   
- markInvoiceAsPaid   ✔       ✔      ✖      ✖   
-================================================= */
+   Handler           Admin  Staff  Doctor  User 
+  |----------------|:-----:|:-----:|:------:|:----:|
+  createinvoice       ✖       ✖      ✔      ✖   
+  markInvoiceAsPaid   ✔       ✔      ✖      ✖   
+  ================================================= */
 
 exports.getInvoices = catchAsync(async (req, res, next) => {
   const user = req.user;
@@ -100,5 +100,45 @@ exports.markInvoiceAsPaid = catchAsync(async (req, res, next) => {
       invoice,
       medicalHistory: updatedHistory,
     },
+  });
+});
+
+exports.getPatientInvoices = catchAsync(async (req, res, next) => {
+  const { patientId } = req.params;
+
+  const invoices = await Invoice.find({ patient: patientId })
+    .populate({
+      path: 'patient',
+      select: 'firstName lastName email phone',
+      options: { virtuals: false },
+    })
+    .populate('medicalHistory', 'diagnosis treatment date')
+    .populate('issuedBy', 'fullName email role')
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({
+    status: 'success',
+    results: invoices.length,
+    data: invoices,
+  });
+});
+
+exports.getInvoiceById = catchAsync(async (req, res, next) => {
+  const invoice = await Invoice.findById(req.params.id)
+    .populate({
+      path: 'patient',
+      select: 'firstName lastName email phone',
+      options: { virtuals: false },
+    })
+    .populate('medicalHistory', 'diagnosis treatment date')
+    .populate('issuedBy', 'fullName email role');
+
+  if (!invoice) {
+    return next(new AppError('Invoice not found', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: invoice,
   });
 });

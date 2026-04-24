@@ -18,10 +18,9 @@ if (missing.length > 0) {
   process.exit(1);
 }
 
-const db = process.env.DATABASE.replace(
-  '<PASSWORD>',
-  process.env.DATABASE_PASSWORD,
-);
+const db =
+  process.env.DATABASE_LOCAL ||
+  process.env.DATABASE.replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
 
 mongoose
   .connect(db)
