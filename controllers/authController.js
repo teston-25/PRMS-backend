@@ -20,7 +20,12 @@ exports.signup = catchAsync(async (req, res, next) => {
   if (exists) {
     return next(new AppError('Email already exists', 400));
   }
-  const user = await User.create({ fullName, email, password, role });
+  const user = await User.create({
+    fullName,
+    email,
+    password,
+    role: role || 'user',
+  });
   const token = generateToken(user);
 
   await logAction({
@@ -84,43 +89,55 @@ exports.signin = catchAsync(async (req, res, next) => {
 // Request password reset
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   const user = await User.findOne({ email: req.body.email });
+
   if (!user) {
-    return next(new AppError('No user with that email', 404));
+    return res.status(200).json({
+      status: 'success',
+      message:
+        'If an account exists with that email, a reset link has been sent.',
+    });
   }
 
   const resetToken = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
 
-  await logAction({
-    req,
-    action: 'Forgot Password',
-    targetType: 'User',
-    targetId: user._id,
-  });
-
-  const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-
   try {
+    const resetURL = `${process.env.FRONTEND_URL.replace(/\/$/, '')}/reset-password/${resetToken}`;
+
     await sendEmail({
       email: user.email,
-      subject: 'Password reset token (valid for 10 minutes)',
+      subject: 'Password reset token (valid for 10 min)',
       message: `Reset your password by visiting: ${resetURL}`,
-      resetURL: resetURL,
+      resetURL,
+    });
+
+    await logAction({
+      req,
+      action: 'Forgot Password',
+      targetType: 'User',
+      targetId: user._id,
     });
 
     res.status(200).json({
       status: 'success',
-      message: 'Token sent to email!',
+      message:
+        'If an account exists with that email, a reset link has been sent.',
     });
   } catch (err) {
+    console.log('Detailed Email Error:', err);
+    user.passwordResetToken = undefined;
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
 
-    return next(new AppError('Error sending email. Try again later.', 500));
+    return next(
+      new AppError(
+        'There was an error sending the email. Try again later.',
+        500,
+      ),
+    );
   }
 });
-
 // Reset password
 exports.resetPassword = catchAsync(async (req, res, next) => {
   const hashedToken = crypto

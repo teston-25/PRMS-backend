@@ -18,14 +18,14 @@ router
   .route('/today')
   .get(
     restrictTo('admin', 'staff'),
-    appointmentController.getTodayAppointments
+    appointmentController.getTodayAppointments,
   );
 
 router
   .route('/by-date')
   .get(
     restrictTo('admin', 'staff'),
-    appointmentController.getAppointmentsByDate
+    appointmentController.getAppointmentsByDate,
   );
 
 router
@@ -34,31 +34,27 @@ router
   .patch(restrictTo('admin', 'staff'), appointmentController.updateAppointment)
   .delete(
     restrictTo('admin', 'staff'),
-    appointmentController.deleteAppointment
+    appointmentController.deleteAppointment,
   );
-
-router
-  .route('/my-appointments')
-  .get(restrictTo('doctor', 'staff'), appointmentController.getMyAppointments);
 
 router
   .route('/today/my')
   .get(
     restrictTo('doctor', 'staff'),
-    appointmentController.getTodayMyAppointments
+    appointmentController.getTodayMyAppointments,
   );
 
 router
   .route('/:id/status')
   .patch(
     restrictTo('doctor', 'staff'),
-    appointmentController.updateAppointmentStatus
+    appointmentController.updateAppointmentStatus,
   );
 
 router.get(
   '/patient/:id',
   restrictTo('admin', 'staff', 'user'),
-  appointmentController.getAppointmentsByPatient
+  appointmentController.getAppointmentsByPatient,
 );
 
 module.exports = router;

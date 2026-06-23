@@ -6,6 +6,9 @@ const globalErrorHandler = require('./controllers/errorController');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./utils/swagger');
 
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+
 const patientRoutes = require('./routes/patientRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const profileRoutes = require('./routes/profileRoutes');
@@ -30,11 +33,23 @@ const disableCaching = (req, res, next) => {
 
 const app = express();
 
+app.use(helmet());
+app.use((req, res, next) => {
+  if (req.body) {
+    req.body = mongoSanitize.sanitize(req.body);
+  }
+  next();
+});
+
 app.set('trust proxy', 1);
+const allowedOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',')
+  : ['https://prms-snc.vercel.app'];
+
 app.use(
   cors({
-    origin: ['https://prms-psi.vercel.app'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   }),
 );
@@ -51,13 +66,19 @@ app.get('/', (req, res) => {
   res.send('🎉 Welcome to the Backend API!');
 });
 
+<<<<<<< HEAD
 app.use(disableCaching);
+=======
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+>>>>>>> 5da33ef116e06d40b637d34d03bcc50270442d22
 
 app.use('/api/auth', authRoutes);
 app.use('/api/patient', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/profile', profileRoutes);
-app.use('/api', historyRoutes);
+app.use('/api/history', historyRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/invoices', invoiceRoutes);

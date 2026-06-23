@@ -55,16 +55,15 @@ const patientSchema = new mongoose.Schema(
       },
     },
     phone: {
-      type: Number,
+      type: String,
       required: [true, 'Phone number is required'],
       unique: true,
       validate: {
         validator: function (v) {
-          // Check if positive number and exactly 10 digits
-          return v > 0 && v.toString().length === 10;
+          return /^(\+251|0)?\d{9}$/.test(v);
         },
         message: (props) =>
-          `${props.value} is not valid! Phone must be a positive 9-digit number.`,
+          `${props.value} is not valid! Phone must be exactly 9 digits.`,
       },
     },
     address: {
@@ -78,7 +77,7 @@ const patientSchema = new mongoose.Schema(
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 patientSchema.virtual('age').get(function () {

@@ -1,13 +1,14 @@
 const Invoice = require('../models/invoiceModel');
 const History = require('../models/historyModel');
 const catchAsync = require('../middleware/catchAsync');
+const AppError = require('../utils/appError');
 
 /** ================= Role Matrix =================
- Handler           Admin  Staff  Doctor  User 
-|----------------|:-----:|:-----:|:------:|:----:|
- createinvoice       ✖       ✖      ✔      ✖   
- markInvoiceAsPaid   ✔       ✔      ✖      ✖   
-================================================= */
+   Handler           Admin  Staff  Doctor  User 
+  |----------------|:-----:|:-----:|:------:|:----:|
+  createinvoice       ✖       ✖      ✔      ✖   
+  markInvoiceAsPaid   ✔       ✔      ✖      ✖   
+  ================================================= */
 
 exports.getInvoices = catchAsync(async (req, res, next) => {
   const user = req.user;
@@ -21,7 +22,11 @@ exports.getInvoices = catchAsync(async (req, res, next) => {
   if (user.role === 'user') {
     filter.patient = user.patient;
   }
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 20;
+  const skip = (page - 1) * limit;
 
+  const total = await Invoice.countDocuments(filter);
   const invoices = await Invoice.find(filter)
     .populate({
       path: 'patient',
@@ -30,11 +35,16 @@ exports.getInvoices = catchAsync(async (req, res, next) => {
     })
     .populate('medicalHistory', 'diagnosis treatment date')
     .populate('issuedBy', 'fullName email role')
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
 
   res.status(200).json({
     status: 'success',
     results: invoices.length,
+    total,
+    page,
+    totalPages: Math.ceil(total / limit),
     data: invoices,
   });
 });
@@ -76,7 +86,7 @@ exports.markInvoiceAsPaid = catchAsync(async (req, res, next) => {
   const updatedHistory = await History.findByIdAndUpdate(
     invoice.medicalHistory,
     { billingStatus: 'paid' },
-    { new: true }
+    { new: true },
   );
 
   if (!updatedHistory) {
@@ -90,5 +100,45 @@ exports.markInvoiceAsPaid = catchAsync(async (req, res, next) => {
       invoice,
       medicalHistory: updatedHistory,
     },
+  });
+});
+
+exports.getPatientInvoices = catchAsync(async (req, res, next) => {
+  const { patientId } = req.params;
+
+  const invoices = await Invoice.find({ patient: patientId })
+    .populate({
+      path: 'patient',
+      select: 'firstName lastName email phone',
+      options: { virtuals: false },
+    })
+    .populate('medicalHistory', 'diagnosis treatment date')
+    .populate('issuedBy', 'fullName email role')
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({
+    status: 'success',
+    results: invoices.length,
+    data: invoices,
+  });
+});
+
+exports.getInvoiceById = catchAsync(async (req, res, next) => {
+  const invoice = await Invoice.findById(req.params.id)
+    .populate({
+      path: 'patient',
+      select: 'firstName lastName email phone',
+      options: { virtuals: false },
+    })
+    .populate('medicalHistory', 'diagnosis treatment date')
+    .populate('issuedBy', 'fullName email role');
+
+  if (!invoice) {
+    return next(new AppError('Invoice not found', 404));
+  }
+
+  res.status(200).json({
+    status: 'success',
+    data: invoice,
   });
 });

@@ -13,7 +13,13 @@ Delete Medical History	  ✘	    ✘	      ✔	    ✔
 =====================================================*/
 
 exports.getMedicalHistory = catchAsync(async (req, res, next) => {
-  const history = await History.find({ patient: req.params.id });
+  const patientId = req.params.patientId;
+
+  const history = await History.find({ patient: patientId });
+  if (!history || history.length === 0) {
+    return next(new AppError('No medical history found for this patient', 404));
+  }
+
   res.status(200).json({
     status: 'success',
     result: history.length,
@@ -22,18 +28,20 @@ exports.getMedicalHistory = catchAsync(async (req, res, next) => {
 });
 
 exports.addMedicalHistory = catchAsync(async (req, res, next) => {
+  const patientId = req.params.patientId || req.params.id;
+
   const newEntry = await History.create({
     ...req.body,
-    patient: req.params.id,
+    patient: patientId,
   });
 
-  await logAction({
-    req,
-    action: 'Add Medical History Entry',
-    targetType: 'Patient',
-    targetId: req.params.id,
-    details: { AddedHistroy: newEntry._id },
-  });
+  // await logAction({
+  //   req,
+  //   action: 'Add Medical History Entry',
+  //   targetType: 'Patient',
+  //   targetId: req.params.id,
+  //   details: { AddedHistory: newEntry._id },
+  // });
 
   res.status(201).json({
     status: 'success',
@@ -42,9 +50,11 @@ exports.addMedicalHistory = catchAsync(async (req, res, next) => {
 });
 
 exports.updateMedicalHistory = catchAsync(async (req, res, next) => {
-  const updated = await History.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
+  const updated = await History.findByIdAndUpdate(
+    req.params.historyId,
+    req.body,
+    { new: true },
+  );
   if (!updated) return next(new AppError('Entry not found', 404));
 
   await logAction({
@@ -62,7 +72,7 @@ exports.updateMedicalHistory = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteMedicalHistory = catchAsync(async (req, res, next) => {
-  const deleted = await History.findByIdAndDelete(req.params.id);
+  const deleted = await History.findByIdAndDelete(req.params.historyId);
   if (!deleted) return next(new AppError('Entry not found', 404));
 
   await logAction({

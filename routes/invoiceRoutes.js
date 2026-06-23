@@ -6,10 +6,15 @@ const { protect, restrictTo } = require('../middleware/protect');
 router.use(protect);
 router.get('/', restrictTo('admin', 'staff'), invoiceController.getInvoices);
 router.post('/', restrictTo('doctor'), invoiceController.createInvoice);
+router.get(
+  '/invoices/patient/:patientId',
+  invoiceController.getPatientInvoices,
+);
+router.get('/invoices/:id', invoiceController.getInvoiceById);
 router.patch(
   '/:id/pay',
   restrictTo('staff'),
-  invoiceController.markInvoiceAsPaid
+  invoiceController.markInvoiceAsPaid,
 );
 
 module.exports = router;

@@ -1,3 +1,5 @@
-node_modules
-config.env
-swaggerDocs.js
+node_modules/  
+config.env  
+.env  
+*.log  
+.DS_Store
