@@ -18,6 +18,16 @@ const invoiceRoutes = require('./routes/invoiceRoutes');
 const cors = require('cors');
 const { apiLimiter, loginLimiter } = require('./middleware/rateLimiter');
 
+const disableCaching = (req, res, next) => {
+  res.setHeader(
+    'Cache-Control',
+    'no-store, no-cache, must-revalidate, proxy-revalidate',
+  );
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+};
+
 const app = express();
 
 app.set('trust proxy', 1);
@@ -26,7 +36,7 @@ app.use(
     origin: ['https://prms-psi.vercel.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-  })
+  }),
 );
 
 app.use(morgan('dev'));
@@ -40,6 +50,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.get('/', (req, res) => {
   res.send('🎉 Welcome to the Backend API!');
 });
+
+app.use(disableCaching);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/patient', patientRoutes);
