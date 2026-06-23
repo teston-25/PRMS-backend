@@ -66,13 +66,11 @@ app.get('/', (req, res) => {
   res.send('🎉 Welcome to the Backend API!');
 });
 
-<<<<<<< HEAD
 app.use(disableCaching);
-=======
+
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
->>>>>>> 5da33ef116e06d40b637d34d03bcc50270442d22
 
 app.use('/api/auth', authRoutes);
 app.use('/api/patient', patientRoutes);
